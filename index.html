@@ -1,0 +1,2253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EggQuest</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800;900&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+:root{
+  --bg:#080f24;--panel:#0f1a3a;--panel2:#162244;--panel3:#1e2e58;
+  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.18);
+  --gold:#ffd84d;--green:#4ade80;--red:#f87171;--purple:#c084fc;--blue:#60a5fa;
+  --text:#f0f4ff;--muted:#6a7fa8;
+  --common:#9ca3af;--uncommon:#4ade80;--rare:#60a5fa;--epic:#c084fc;--legendary:#ffd84d;--shiny:#ff9ff3;
+}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);height:100vh;overflow:hidden;user-select:none;display:flex;flex-direction:column;}
+
+/* ══ TOPBAR ══ */
+#topbar{height:46px;background:#060d1e;border-bottom:1px solid var(--border2);display:flex;align-items:center;justify-content:space-between;padding:0 14px;flex-shrink:0;z-index:60;}
+.logo{font-family:'Baloo 2',cursive;font-size:20px;font-weight:900;background:linear-gradient(90deg,#ffd84d,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+.top-stats{display:flex;gap:7px;align-items:center;}
+.tstat{display:flex;align-items:center;gap:4px;background:var(--panel2);border:1px solid var(--border2);border-radius:20px;padding:3px 11px;font-family:'Baloo 2',cursive;font-weight:800;font-size:12px;}
+.tv{color:var(--gold);}
+.tv.g{color:var(--green);}
+.tm{color:var(--muted);font-size:10px;}
+/* tap multiplier button in topbar */
+#upg-topbtn{
+  display:flex;align-items:center;gap:5px;
+  background:linear-gradient(135deg,rgba(124,58,237,.35),rgba(168,85,247,.25));
+  border:1px solid rgba(168,85,247,.5);border-radius:20px;
+  padding:3px 11px;font-family:'Baloo 2',cursive;font-weight:900;font-size:12px;
+  cursor:pointer;transition:all .15s;color:var(--purple);
+}
+#upg-topbtn:hover{border-color:var(--purple);background:rgba(168,85,247,.35);}
+#upg-topbtn .upg-arrow{font-size:9px;opacity:.7;}
+
+/* ══ MAIN ══ */
+#main{flex:1;display:flex;overflow:hidden;min-height:0;}
+
+/* ══ LEFT: EGG SELECT ══ */
+#egg-select{width:128px;flex-shrink:0;background:#060d1e;border-right:1px solid var(--border2);display:flex;flex-direction:column;overflow:hidden;}
+.es-hdr{padding:8px 10px 6px;font-family:'Baloo 2',cursive;font-size:10px;font-weight:900;color:var(--gold);letter-spacing:1.5px;border-bottom:1px solid var(--border);flex-shrink:0;}
+#egg-select-list{flex:1;overflow-y:auto;padding:5px;display:flex;flex-direction:column;gap:4px;}
+.es-egg{background:var(--panel2);border:2px solid var(--border);border-radius:10px;padding:7px 6px;cursor:pointer;transition:all .15s;text-align:center;position:relative;}
+.es-egg:hover:not(.locked){border-color:var(--border2);transform:translateY(-1px);}
+.es-egg.active{border-color:var(--gold)!important;box-shadow:0 0 0 1px var(--gold);}
+.es-egg .ee-em{font-size:24px;line-height:1;display:block;margin-bottom:2px;}
+.es-egg .ee-name{font-family:'Baloo 2',cursive;font-size:8px;font-weight:900;}
+.es-egg .ee-cost{font-size:7px;font-weight:800;margin-top:2px;}
+.ee-cost.free{color:var(--green);}
+.ee-cost.afford{color:var(--gold);}
+.ee-cost.cant{color:var(--muted);}
+.es-egg .ee-lock{position:absolute;inset:0;background:rgba(0,0,0,.6);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;}
+
+/* ══ CENTER: WORLD ══ */
+#world{flex:1;position:relative;overflow:hidden;background:linear-gradient(180deg,#070d1e 0%,#111d48 42%,#192d66 62%,#1f3a18 62.1%,#152910 82%,#0d1a08 100%);}
+#world::before{content:'';position:absolute;inset:0;pointer-events:none;background-image:
+  radial-gradient(1.5px 1.5px at 7% 6%,rgba(255,255,255,.65) 0%,transparent 100%),
+  radial-gradient(1px 1px at 21% 12%,rgba(255,255,255,.5) 0%,transparent 100%),
+  radial-gradient(2px 2px at 36% 4%,rgba(255,255,255,.75) 0%,transparent 100%),
+  radial-gradient(1px 1px at 54% 10%,rgba(255,255,255,.4) 0%,transparent 100%),
+  radial-gradient(1.5px 1.5px at 69% 7%,rgba(255,255,255,.6) 0%,transparent 100%),
+  radial-gradient(1px 1px at 85% 15%,rgba(255,255,255,.5) 0%,transparent 100%),
+  radial-gradient(1px 1px at 13% 22%,rgba(255,255,255,.3) 0%,transparent 100%),
+  radial-gradient(1px 1px at 59% 19%,rgba(255,255,255,.35) 0%,transparent 100%),
+  radial-gradient(1px 1px at 31% 27%,rgba(255,255,255,.28) 0%,transparent 100%),
+  radial-gradient(1px 1px at 77% 9%,rgba(255,255,255,.4) 0%,transparent 100%),
+  radial-gradient(1px 1px at 45% 17%,rgba(255,255,255,.25) 0%,transparent 100%);}
+#world::after{content:'🌙';position:absolute;top:14px;right:34px;font-size:28px;pointer-events:none;animation:mglow 4s ease-in-out infinite alternate;}
+@keyframes mglow{0%{filter:drop-shadow(0 0 6px rgba(255,240,150,.3));}100%{filter:drop-shadow(0 0 18px rgba(255,240,150,.8));}}
+
+.tree{position:absolute;bottom:37%;pointer-events:none;filter:drop-shadow(0 4px 5px rgba(0,0,0,.5));}
+.flower{position:absolute;pointer-events:none;}
+#platform{position:absolute;left:50%;bottom:37%;transform:translateX(-50%);width:196px;height:37px;background:linear-gradient(180deg,#9b7520,#5a3e0a);border-radius:10px 10px 5px 5px;border-top:3px solid #d4af30;box-shadow:0 5px 0 #3a2505,0 7px 18px rgba(0,0,0,.6);}
+#world-egg-wrap{position:absolute;left:50%;bottom:calc(37% + 27px);transform:translateX(-50%);cursor:pointer;z-index:10;display:flex;flex-direction:column;align-items:center;}
+#world-egg{font-size:74px;line-height:1;animation:efloat 3s ease-in-out infinite;filter:drop-shadow(0 4px 18px rgba(255,216,77,.2));transition:filter .2s;}
+#world-egg-wrap:hover #world-egg{filter:drop-shadow(0 4px 28px rgba(255,216,77,.5));}
+@keyframes efloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-7px);}}
+#world-egg.pop{animation:epop .4s ease;}
+@keyframes epop{0%{transform:scale(1);}25%{transform:scale(1.22) rotate(-7deg);}55%{transform:scale(.88) rotate(5deg);}80%{transform:scale(1.06);}100%{transform:scale(1) rotate(0);}}
+#egg-tap-hint{font-family:'Baloo 2',cursive;font-size:9px;font-weight:800;color:rgba(255,216,77,.6);margin-top:3px;letter-spacing:1px;animation:fadeHint 2s ease-in-out infinite alternate;}
+@keyframes fadeHint{0%{opacity:.4;}100%{opacity:.9;}}
+
+#lucky-banner{position:absolute;top:8px;left:50%;transform:translateX(-50%);background:rgba(255,216,77,.15);border:1px solid rgba(255,216,77,.5);border-radius:20px;padding:3px 12px;font-family:'Baloo 2',cursive;font-size:9px;font-weight:900;color:var(--gold);display:none;z-index:25;animation:lpulse 1.5s infinite alternate;}
+@keyframes lpulse{0%{opacity:.7;}100%{opacity:1;box-shadow:0 0 10px rgba(255,216,77,.4);}}
+
+/* ══ EGG INFO PANEL ══ */
+#egg-info-panel{
+  position:absolute;left:50%;bottom:0;transform:translateX(-50%) translateY(100%);
+  width:min(380px,100%);background:rgba(6,13,30,.97);
+  border-top:2px solid var(--border2);border-left:1px solid var(--border2);border-right:1px solid var(--border2);
+  border-radius:18px 18px 0 0;padding:13px 13px 9px;z-index:30;
+  transition:transform .35s cubic-bezier(.22,.68,0,1.2),opacity .25s;opacity:0;
+}
+#egg-info-panel.open{transform:translateX(-50%) translateY(0);opacity:1;}
+.eip-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;}
+.eip-title{display:flex;align-items:center;gap:8px;}
+.eip-em{font-size:30px;line-height:1;}
+.eip-name{font-family:'Baloo 2',cursive;font-size:15px;font-weight:900;}
+.eip-cost{font-size:10px;font-weight:800;color:var(--gold);margin-top:1px;}
+.eip-cost.free{color:var(--green);}
+.eip-close{width:26px;height:26px;background:rgba(255,255,255,.08);border:none;border-radius:50%;color:var(--text);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+.eip-pets{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:4px;margin-bottom:9px;max-height:138px;overflow-y:auto;}
+.eip-pet{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:5px 3px;text-align:center;}
+.ipp-em{font-size:20px;}
+.ipp-name{font-size:7px;font-weight:800;margin-top:2px;}
+.ipp-bar-wrap{height:3px;background:rgba(255,255,255,.08);border-radius:3px;margin:3px 2px 2px;overflow:hidden;}
+.ipp-bar{height:100%;border-radius:3px;}
+.ipp-pct{font-size:8px;font-weight:900;}
+.ipp-mult{font-size:7px;color:var(--muted);margin-top:1px;}
+.eip-actions{display:flex;gap:6px;align-items:center;}
+.hatch-btn{flex:1;padding:10px 5px;border:none;border-radius:10px;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;transition:all .12s;touch-action:manipulation;}
+.hatch-btn.h1{background:linear-gradient(135deg,#d97706,#f59e0b);color:#1a0800;box-shadow:0 3px 0 #92400e;}
+.hatch-btn.h1:hover{filter:brightness(1.08);}
+.hatch-btn.h1:active{transform:translateY(2px);box-shadow:0 1px 0 #92400e;}
+.hatch-btn.h3{background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;box-shadow:0 3px 0 #4c1d95;}
+.hatch-btn.h3:hover{filter:brightness(1.08);}
+.hatch-btn.h3:active{transform:translateY(2px);box-shadow:0 1px 0 #4c1d95;}
+.hatch-btn.hauto{background:linear-gradient(135deg,#059669,#10b981);color:#fff;box-shadow:0 3px 0 #065f46;}
+.hatch-btn.hauto.running{background:linear-gradient(135deg,#dc2626,#ef4444);box-shadow:0 3px 0 #991b1b;}
+.hatch-btn:disabled{opacity:.35;cursor:not-allowed;}
+.eip-cost-hint{font-size:9px;color:var(--muted);text-align:center;margin-top:4px;}
+
+/* ══ BOTTOM TAP ══ */
+#tap-zone{flex-shrink:0;height:80px;background:#060d1e;border-top:1px solid var(--border2);display:flex;align-items:center;justify-content:center;position:relative;z-index:50;}
+#tap-btn{background:linear-gradient(135deg,#f59e0b,#d97706);border:none;border-radius:50px;padding:13px 50px;font-family:'Baloo 2',cursive;font-weight:900;font-size:21px;color:#1a0800;cursor:pointer;box-shadow:0 6px 0 #92400e,0 8px 22px rgba(245,158,11,.5);transition:transform .08s,box-shadow .08s;touch-action:manipulation;}
+#tap-btn:hover{filter:brightness(1.08);}
+#tap-btn:active{transform:translateY(5px)!important;box-shadow:0 1px 0 #92400e,0 2px 6px rgba(245,158,11,.3)!important;}
+#tap-sub{position:absolute;bottom:7px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--muted);font-weight:700;font-family:'Baloo 2',cursive;white-space:nowrap;}
+
+/* ══ RIGHT PANEL ══ */
+#right-panel{width:210px;flex-shrink:0;background:#060d1e;border-left:1px solid var(--border2);display:flex;flex-direction:column;overflow:hidden;}
+.rp-tabs{display:flex;border-bottom:1px solid var(--border);}
+.rp-tab{flex:1;padding:8px 2px;text-align:center;font-family:'Baloo 2',cursive;font-size:9px;font-weight:900;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer;transition:all .12s;}
+.rp-tab.active{color:var(--gold);border-bottom-color:var(--gold);}
+.rp-body{flex:1;overflow-y:auto;padding:8px;}
+/* equip */
+.eq-hint{font-size:9px;color:var(--muted);font-weight:700;text-align:center;margin-bottom:6px;}
+.slots-row{display:flex;gap:5px;justify-content:center;margin-bottom:8px;}
+.eslot{width:55px;height:58px;background:var(--panel2);border:2px dashed var(--border2);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;transition:all .14s;position:relative;}
+.eslot:hover{border-color:var(--gold);}
+.eslot.on{border-style:solid;border-color:var(--green);}
+.eslot.shiny-slot{border-color:var(--shiny)!important;}
+.eslot .se{font-size:24px;}
+.eslot .sm{font-size:7px;margin-top:1px;font-weight:800;}
+.eslot .sx{position:absolute;top:2px;right:3px;font-size:11px;color:var(--red);display:none;cursor:pointer;font-weight:900;line-height:1;}
+.eslot.on .sx{display:block;}
+.eq-total{background:rgba(74,222,128,.1);border:1px solid rgba(74,222,128,.2);border-radius:7px;padding:6px;text-align:center;font-size:11px;font-weight:800;color:var(--green);margin-bottom:6px;}
+/* bag */
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:4px;}
+.pc{background:var(--panel2);border:2px solid var(--border);border-radius:9px;padding:5px 3px;text-align:center;cursor:pointer;transition:all .14s;position:relative;}
+.pc:hover{border-color:var(--border2);transform:scale(1.04);}
+.pc.on{border-color:var(--green);}
+.pc.is-shiny{border-color:var(--shiny);}
+.pc .pe{font-size:22px;}
+.pc .pn{font-size:8px;font-weight:800;margin-top:2px;}
+.pc .pm{font-size:9px;font-weight:900;}
+.pc .pcount{position:absolute;top:2px;right:3px;background:rgba(0,0,0,.75);border-radius:5px;padding:0 3px;font-size:7px;font-weight:900;}
+.pc .pon{position:absolute;top:2px;left:2px;background:var(--green);border-radius:3px;padding:0 2px;font-size:6px;font-weight:900;color:#000;}
+.rdiv{grid-column:1/-1;font-size:8px;font-weight:900;padding:4px 0 2px;text-transform:uppercase;letter-spacing:1px;}
+.empty{grid-column:1/-1;text-align:center;color:var(--muted);font-size:11px;padding:18px 8px;}
+/* craft */
+.craft-card{background:var(--panel2);border:2px solid var(--border);border-radius:9px;padding:7px;margin-bottom:5px;}
+.craft-top{display:flex;align-items:center;gap:7px;margin-bottom:5px;}
+.craft-em{font-size:22px;}
+.cname{font-family:'Baloo 2',cursive;font-weight:900;font-size:10px;}
+.cdesc{font-size:8px;color:var(--muted);margin-top:1px;}
+.craft-btn{width:100%;padding:5px 0;border:none;border-radius:6px;font-family:'Baloo 2',cursive;font-weight:900;font-size:10px;cursor:pointer;transition:all .12s;}
+.craft-btn.can{background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;box-shadow:0 2px 0 #4c1d95;}
+.craft-btn.can:active{transform:translateY(1px);}
+.craft-btn.cant{background:rgba(255,255,255,.05);color:var(--muted);cursor:not-allowed;}
+/* stats */
+.strow{display:flex;justify-content:space-between;padding:5px 2px;border-bottom:1px solid var(--border);font-size:11px;}
+.strow .sl{color:var(--muted);}
+.strow .sv{font-weight:900;font-family:'Baloo 2',cursive;}
+
+/* ══ UPGRADE SHOP MODAL ══ */
+#upg-modal{display:none;position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.82);align-items:center;justify-content:center;}
+#upg-modal.open{display:flex;animation:fin .2s;}
+#upg-box{background:var(--panel);border:1px solid var(--border2);border-radius:18px;padding:18px;width:min(440px,96vw);max-height:85vh;overflow-y:auto;}
+.upg-box-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.upg-box-title{font-family:'Baloo 2',cursive;font-size:16px;font-weight:900;color:var(--purple);}
+.upg-box-close{width:28px;height:28px;background:rgba(255,255,255,.08);border:none;border-radius:50%;color:var(--text);font-size:14px;cursor:pointer;}
+.upg-formula{background:rgba(168,85,247,.1);border:1px solid rgba(168,85,247,.3);border-radius:10px;padding:9px 12px;font-size:11px;margin-bottom:14px;line-height:1.6;}
+.upg-formula strong{color:var(--purple);}
+.upg-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.upg-item{background:var(--panel2);border:2px solid var(--border);border-radius:12px;padding:10px;cursor:pointer;transition:all .15s;}
+.upg-item:hover:not(.bought){border-color:var(--purple);transform:translateY(-1px);}
+.upg-item.bought{border-color:rgba(74,222,128,.4);cursor:default;}
+.upg-item .ui-top{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.upg-item .ui-em{font-size:22px;}
+.upg-item .ui-name{font-family:'Baloo 2',cursive;font-size:11px;font-weight:900;}
+.upg-item .ui-effect{font-size:9px;color:var(--purple);margin-top:1px;}
+.upg-item .ui-desc{font-size:9px;color:var(--muted);margin-bottom:6px;line-height:1.4;}
+.upg-item .ui-btn{width:100%;padding:5px 0;border:none;border-radius:7px;font-family:'Baloo 2',cursive;font-weight:900;font-size:10px;cursor:pointer;transition:all .12s;}
+.upg-item.bought .ui-btn{background:rgba(74,222,128,.15);color:var(--green);cursor:default;}
+.upg-item:not(.bought) .ui-btn.can{background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;}
+.upg-item:not(.bought) .ui-btn.cant{background:rgba(255,255,255,.06);color:var(--muted);cursor:not-allowed;}
+
+/* ══ SLOT PICKER ══ */
+#slot-picker{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.8);align-items:center;justify-content:center;}
+#slot-picker.open{display:flex;animation:fin .18s;}
+#sp-box{background:var(--panel);border:1px solid var(--border2);border-radius:16px;padding:16px;width:270px;}
+#sp-title{font-family:'Baloo 2',cursive;font-size:13px;font-weight:900;color:var(--gold);text-align:center;margin-bottom:10px;}
+#sp-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-bottom:10px;}
+.sp-slot{background:var(--panel2);border:2px dashed var(--border2);border-radius:9px;padding:7px 4px;text-align:center;cursor:pointer;transition:all .13s;}
+.sp-slot:hover{border-color:var(--gold);transform:scale(1.05);}
+.sp-slot.has{border-style:solid;border-color:var(--green);}
+.sp-slot .ss-em{font-size:22px;}
+.sp-slot .ss-name{font-size:7px;font-weight:800;margin-top:2px;color:var(--muted);}
+.sp-slot .ss-mult{font-size:8px;font-weight:900;}
+#sp-cancel{width:100%;padding:7px;border:none;border-radius:7px;background:rgba(255,255,255,.08);color:var(--text);font-family:'Baloo 2',cursive;font-weight:800;font-size:11px;cursor:pointer;}
+
+/* ══ REVEALS ══ */
+#reveal{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.88);flex-direction:column;align-items:center;justify-content:center;gap:5px;}
+#reveal.open{display:flex;animation:fin .2s;}
+#rv-rar{font-family:'Baloo 2',cursive;font-size:24px;font-weight:900;letter-spacing:3px;text-transform:uppercase;animation:pin .45s .1s both;}
+#rv-em{font-size:92px;line-height:1;animation:pin .5s .2s both;}
+#rv-name{font-family:'Baloo 2',cursive;font-size:22px;font-weight:900;animation:pin .45s .3s both;}
+#rv-mult{font-size:12px;color:var(--green);font-weight:800;animation:pin .4s .4s both;}
+#rv-new{background:var(--gold);color:#1a0800;border-radius:20px;padding:3px 12px;font-size:11px;font-weight:900;display:none;animation:pin .35s .5s both;}
+#rv-btn{background:linear-gradient(135deg,#7c3aed,#4338ca);color:#fff;border:none;border-radius:11px;padding:11px 32px;font-family:'Baloo 2',cursive;font-weight:900;font-size:15px;cursor:pointer;margin-top:8px;animation:pin .35s .55s both;box-shadow:0 4px 14px rgba(124,58,237,.5);transition:transform .12s;}
+#rv-btn:hover{transform:scale(1.05);}
+#multi-reveal{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.9);flex-direction:column;align-items:center;justify-content:center;gap:10px;}
+#multi-reveal.open{display:flex;animation:fin .22s;}
+#mr-title{font-family:'Baloo 2',cursive;font-size:18px;font-weight:900;color:var(--gold);}
+#mr-grid{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;max-width:480px;max-height:55vh;overflow-y:auto;}
+.mr-card{background:var(--panel2);border:2px solid var(--border);border-radius:9px;padding:8px 7px;text-align:center;width:76px;animation:pin .35s calc(var(--i)*.05s) both;}
+.mr-card .mc-em{font-size:26px;}
+.mr-card .mc-name{font-size:7px;font-weight:800;margin-top:2px;}
+.mr-card .mc-rar{font-size:7px;font-weight:900;margin-top:1px;}
+#mr-btn{background:linear-gradient(135deg,#7c3aed,#4338ca);color:#fff;border:none;border-radius:11px;padding:10px 30px;font-family:'Baloo 2',cursive;font-weight:900;font-size:14px;cursor:pointer;box-shadow:0 4px 14px rgba(124,58,237,.5);transition:transform .12s;}
+#mr-btn:hover{transform:scale(1.05);}
+
+@keyframes fin{from{opacity:0;}to{opacity:1;}}
+@keyframes pin{from{transform:scale(.4) rotate(-8deg);opacity:0;}70%{transform:scale(1.08) rotate(2deg);}to{transform:scale(1) rotate(0);opacity:1;}}
+#notify{position:fixed;top:12px;left:50%;transform:translateX(-50%);background:var(--panel3);border:1px solid var(--border2);border-radius:20px;padding:6px 18px;font-size:11px;font-weight:800;z-index:700;opacity:0;transition:opacity .18s;pointer-events:none;font-family:'Baloo 2',cursive;white-space:nowrap;}
+#notify.show{opacity:1;}
+.part{position:fixed;border-radius:50%;pointer-events:none;z-index:400;animation:pfly .7s ease-out forwards;}
+@keyframes pfly{0%{transform:translate(0,0) scale(1);opacity:1;}100%{transform:translate(var(--tx),var(--ty)) scale(0);opacity:0;}}
+.floatN{position:fixed;pointer-events:none;z-index:999;font-family:'Baloo 2',cursive;font-weight:900;font-size:19px;color:var(--gold);text-shadow:0 0 10px rgba(255,200,0,.8);animation:fup .6s ease-out forwards;}
+@keyframes fup{0%{opacity:1;transform:translate(-50%,-50%);}100%{opacity:0;transform:translate(-50%,-190%);}}
+.ripple{position:fixed;border-radius:50%;border:2px solid rgba(255,216,77,.6);pointer-events:none;z-index:999;transform:translate(-50%,-50%);animation:rpl .42s ease-out forwards;}
+@keyframes rpl{0%{width:0;height:0;opacity:1;}100%{width:66px;height:66px;opacity:0;}}
+/* ══ AUTH MODAL ══ */
+#auth-modal{display:none;position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.85);align-items:center;justify-content:center;}
+#auth-modal.open{display:flex;animation:fin .2s;}
+#auth-box{background:var(--panel);border:1px solid var(--border2);border-radius:18px;padding:24px;width:min(360px,94vw);}
+.auth-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.auth-title{font-family:'Baloo 2',cursive;font-size:17px;font-weight:900;color:var(--blue);}
+.auth-close{width:28px;height:28px;background:rgba(255,255,255,.08);border:none;border-radius:50%;color:var(--text);font-size:14px;cursor:pointer;}
+.auth-tabs{display:flex;gap:6px;margin-bottom:14px;}
+.auth-tab{flex:1;padding:7px;border:none;border-radius:8px;font-family:'Baloo 2',cursive;font-weight:800;font-size:12px;cursor:pointer;background:rgba(255,255,255,.06);color:var(--muted);transition:all .12s;}
+.auth-tab.active{background:var(--blue);color:#fff;}
+.auth-field{width:100%;padding:10px 12px;border:1px solid var(--border2);border-radius:9px;background:rgba(255,255,255,.06);color:var(--text);font-family:'Nunito',sans-serif;font-size:13px;margin-bottom:10px;outline:none;}
+.auth-field:focus{border-color:var(--blue);}
+.auth-submit{width:100%;padding:11px;border:none;border-radius:9px;background:linear-gradient(135deg,#2563eb,#3b82f6);color:#fff;font-family:'Baloo 2',cursive;font-weight:900;font-size:14px;cursor:pointer;transition:all .12s;margin-bottom:8px;}
+.auth-submit:hover{filter:brightness(1.08);}
+.auth-submit:disabled{opacity:.5;cursor:not-allowed;}
+.auth-msg{font-size:11px;text-align:center;min-height:16px;font-weight:700;}
+.auth-msg.err{color:var(--red);}
+.auth-msg.ok{color:var(--green);}
+.auth-loggedin{text-align:center;}
+.auth-loggedin .al-email{font-size:12px;color:var(--muted);margin-bottom:12px;}
+.auth-loggedin .al-save{width:100%;padding:9px;border:none;border-radius:9px;background:linear-gradient(135deg,#059669,#10b981);color:#fff;font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;margin-bottom:8px;}
+.auth-loggedin .al-load{width:100%;padding:9px;border:none;border-radius:9px;background:rgba(96,165,250,.15);color:var(--blue);border:1px solid rgba(96,165,250,.3);font-family:'Baloo 2',cursive;font-weight:900;font-size:13px;cursor:pointer;margin-bottom:8px;}
+.auth-loggedin .al-out{width:100%;padding:7px;border:none;border-radius:9px;background:rgba(248,113,113,.12);color:var(--red);font-family:'Baloo 2',cursive;font-weight:800;font-size:12px;cursor:pointer;}
+
+/* ══ ADMIN PANEL ══ */
+#admin-panel{display:none;margin-top:14px;border-top:1px solid rgba(255,216,77,.25);padding-top:12px;}
+.admin-title{font-family:'Baloo 2',cursive;font-size:12px;font-weight:900;color:var(--gold);margin-bottom:10px;text-align:center;letter-spacing:1px;}
+.admin-row{display:flex;gap:6px;align-items:center;margin-bottom:8px;}
+.admin-row label{font-size:10px;color:var(--muted);font-weight:700;width:80px;flex-shrink:0;}
+.admin-row input{flex:1;padding:5px 8px;border:1px solid var(--border2);border-radius:7px;background:rgba(255,255,255,.06);color:var(--text);font-family:'Nunito',sans-serif;font-size:12px;outline:none;}
+.admin-row input:focus{border-color:var(--gold);}
+.admin-apply{flex-shrink:0;padding:5px 10px;border:none;border-radius:7px;background:var(--gold);color:#1a0800;font-family:'Baloo 2',cursive;font-weight:900;font-size:10px;cursor:pointer;}
+.admin-row-full{margin-bottom:8px;}
+.admin-row-full label{display:block;font-size:10px;color:var(--muted);font-weight:700;margin-bottom:4px;}
+.admin-presets{display:flex;gap:4px;flex-wrap:wrap;}
+.admin-preset{padding:4px 8px;border:none;border-radius:6px;background:rgba(167,139,250,.2);color:var(--purple);font-family:'Baloo 2',cursive;font-weight:800;font-size:9px;cursor:pointer;border:1px solid rgba(167,139,250,.3);}
+.admin-preset:hover{background:rgba(167,139,250,.35);}
+.admin-divider{height:1px;background:rgba(255,255,255,.06);margin:8px 0;}
+.admin-toggle-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.admin-toggle-label{font-size:10px;color:var(--muted);font-weight:700;}
+.admin-toggle{padding:4px 10px;border:none;border-radius:6px;font-family:'Baloo 2',cursive;font-weight:800;font-size:9px;cursor:pointer;}
+.admin-toggle.on{background:rgba(74,222,128,.2);color:var(--green);border:1px solid rgba(74,222,128,.3);}
+.admin-toggle.off{background:rgba(248,113,113,.15);color:var(--red);border:1px solid rgba(248,113,113,.3);}
+
+::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:3px;}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <div class="logo">🥚 EggQuest</div>
+  <div class="top-stats">
+    <div class="tstat">👆 <span class="tv" id="bal-disp">0</span> <span class="tm">clicks</span></div>
+    <div class="tstat">⚡ <span class="tv g" id="mult-disp">1×</span> <span class="tm">mult</span></div>
+    <div class="tstat">🏆 <span class="tv" id="hatches-disp">0</span> <span class="tm">hatched</span></div>
+    <div id="upg-topbtn" onclick="openUpgModal()">
+      🛒 Upgrades <span class="upg-arrow">▼</span>
+    </div>
+    <div id="auth-btn" onclick="openAuthModal()" style="display:flex;align-items:center;gap:4px;background:var(--panel2);border:1px solid var(--border2);border-radius:20px;padding:3px 11px;font-family:'Baloo 2',cursive;font-weight:800;font-size:12px;cursor:pointer;color:var(--blue);">
+      👤 <span id="auth-label">Login</span>
+    </div>
+  </div>
+</div>
+
+<div id="main">
+  <div id="egg-select">
+    <div class="es-hdr">🥚 EGGS</div>
+    <div id="egg-select-list"></div>
+  </div>
+
+  <div id="world">
+    <div class="tree" style="left:2%;font-size:50px">🌲</div>
+    <div class="tree" style="left:9%;font-size:32px">🌳</div>
+    <div class="tree" style="left:16%;font-size:18px">🌿</div>
+    <div class="tree" style="right:2%;font-size:50px">🌲</div>
+    <div class="tree" style="right:9%;font-size:34px">🌳</div>
+    <div class="tree" style="right:16%;font-size:18px">🌿</div>
+    <div class="flower" style="left:21%;bottom:37%;font-size:14px">🌸🌼</div>
+    <div class="flower" style="right:21%;bottom:37%;font-size:14px">🌺🌻</div>
+    <div id="lucky-banner">⭐ LUCKY EGG — RARE RATES BOOSTED!</div>
+    <div id="platform"></div>
+    <div id="world-egg-wrap" onclick="toggleEggPanel()">
+      <div id="world-egg">🥚</div>
+      <div id="egg-tap-hint">TAP TO HATCH</div>
+    </div>
+    <div id="egg-info-panel">
+      <div class="eip-header">
+        <div class="eip-title">
+          <div class="eip-em" id="eip-em">🥚</div>
+          <div>
+            <div class="eip-name" id="eip-name">Starter Egg</div>
+            <div class="eip-cost" id="eip-cost">Free</div>
+          </div>
+        </div>
+        <button class="eip-close" onclick="closeEggPanel()">✕</button>
+      </div>
+      <div class="eip-pets" id="eip-pets"></div>
+      <div class="eip-actions">
+        <button class="hatch-btn h1" id="btn-h1" onclick="hatch1()">🥚 ×1</button>
+        <button class="hatch-btn h3" id="btn-h3" onclick="hatch3()">🥚 ×3</button>
+        <button class="hatch-btn hauto" id="btn-auto" onclick="toggleAuto()">▶ Auto</button>
+      </div>
+      <div class="eip-cost-hint" id="eip-cost-hint"></div>
+    </div>
+  </div>
+
+  <div id="right-panel">
+    <div class="rp-tabs">
+      <div class="rp-tab active" id="tab-equip" onclick="rTab('equip')">EQUIP</div>
+      <div class="rp-tab" id="tab-bag"   onclick="rTab('bag')">BAG</div>
+      <div class="rp-tab" id="tab-craft" onclick="rTab('craft')">CRAFT</div>
+      <div class="rp-tab" id="tab-stats" onclick="rTab('stats')">STATS</div>
+    </div>
+    <div class="rp-body" id="rp-body"></div>
+  </div>
+</div>
+
+<div id="tap-zone">
+  <button id="tap-btn" onclick="doTap(event)">👆 TAP!</button>
+  <div id="tap-sub">+1 click per tap</div>
+</div>
+
+<!-- UPGRADE MODAL -->
+<div id="upg-modal" onclick="closeUpgModalBg(event)">
+  <div id="upg-box">
+    <div class="upg-box-hdr">
+      <div class="upg-box-title">⚡ Tap Multiplier Upgrades</div>
+      <button class="upg-box-close" onclick="closeUpgModal()">✕</button>
+    </div>
+    <div class="upg-formula">
+      <strong>How it works:</strong> Each upgrade adds a flat bonus to your base tap.<br>
+      <strong>Formula:</strong> Clicks per tap = <strong>Pet Power × (1 + total bonus)</strong><br>
+      Example: pets give 50× · buy +2 and +4 → 50 × (1+2+4) = <strong>350×</strong>
+    </div>
+    <div class="upg-grid" id="upg-grid"></div>
+  </div>
+</div>
+
+<!-- SLOT PICKER -->
+<div id="slot-picker">
+  <div id="sp-box">
+    <div id="sp-title">Choose slot</div>
+    <div id="sp-grid"></div>
+    <button id="sp-cancel" onclick="closeSlotPicker()">Cancel</button>
+  </div>
+</div>
+
+<!-- SINGLE REVEAL -->
+<div id="reveal">
+  <div id="rv-rar"></div>
+  <div id="rv-em"></div>
+  <div id="rv-name"></div>
+  <div id="rv-mult"></div>
+  <div id="rv-new">✨ NEW PET!</div>
+  <button id="rv-btn" onclick="closeReveal()">Nice! 🎉</button>
+</div>
+
+<!-- MULTI REVEAL -->
+<div id="multi-reveal">
+  <div id="mr-title"></div>
+  <div id="mr-grid"></div>
+  <button id="mr-btn" onclick="closeMultiReveal()">Sweet! 🎊</button>
+</div>
+
+<!-- AUTH MODAL -->
+<div id="auth-modal" onclick="closeAuthModalBg(event)">
+  <div id="auth-box">
+    <div class="auth-hdr">
+      <div class="auth-title">👤 Account</div>
+      <button class="auth-close" onclick="closeAuthModal()">✕</button>
+    </div>
+    <div id="auth-logged-out">
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Login</button>
+        <button class="auth-tab" id="tab-signup" onclick="switchAuthTab('signup')">Sign Up</button>
+      </div>
+      <input class="auth-field" id="auth-email" type="email" placeholder="Email">
+      <input class="auth-field" id="auth-pass" type="password" placeholder="Password">
+      <button class="auth-submit" id="auth-submit-btn" onclick="authSubmit()">Login</button>
+      <div class="auth-msg" id="auth-msg"></div>
+    </div>
+    <div id="auth-logged-in" style="display:none;" class="auth-loggedin">
+      <div class="al-email" id="auth-user-email"></div>
+      <button class="al-save" onclick="saveGame()">💾 Save Game</button>
+      <button class="al-load" onclick="loadGame()">📂 Load Game</button>
+      <div class="auth-msg" id="auth-save-msg"></div>
+      <button class="al-out" onclick="signOut()">Sign Out</button>
+
+      <!-- ADMIN PANEL — only shown for admin email -->
+      <div id="admin-panel">
+        <div class="admin-title">🔧 ADMIN TOOLS</div>
+
+        <div class="admin-row">
+          <label>Add Clicks</label>
+          <input type="number" id="admin-clicks-val" placeholder="e.g. 1000000" min="0">
+          <button class="admin-apply" onclick="adminAddClicks()">Add</button>
+        </div>
+
+        <div class="admin-row">
+          <label>Set Clicks</label>
+          <input type="number" id="admin-set-clicks" placeholder="exact amount" min="0">
+          <button class="admin-apply" onclick="adminSetClicks()">Set</button>
+        </div>
+
+        <div class="admin-row-full">
+          <label>Quick Balance Presets</label>
+          <div class="admin-presets">
+            <button class="admin-preset" onclick="adminPreset(1e3)">1K</button>
+            <button class="admin-preset" onclick="adminPreset(1e6)">1M</button>
+            <button class="admin-preset" onclick="adminPreset(1e9)">1B</button>
+            <button class="admin-preset" onclick="adminPreset(1e12)">1T</button>
+            <button class="admin-preset" onclick="adminPreset(1e15)">1Qa</button>
+            <button class="admin-preset" onclick="adminPreset(1e18)">1Qt</button>
+            <button class="admin-preset" onclick="adminPreset(1e21)">1Sx</button>
+            <button class="admin-preset" onclick="adminPreset(1e24)">1Sp</button>
+          </div>
+        </div>
+
+        <div class="admin-divider"></div>
+
+        <div class="admin-toggle-row">
+          <span class="admin-toggle-label">🍀 Lucky Egg (permanent)</span>
+          <button class="admin-toggle off" id="admin-lucky-btn" onclick="adminToggleLucky()">OFF</button>
+        </div>
+
+        <div class="admin-toggle-row">
+          <span class="admin-toggle-label">⚡ Unlock All Eggs</span>
+          <button class="admin-toggle off" id="admin-unlock-btn" onclick="adminUnlockAll()">Unlock</button>
+        </div>
+
+        <div class="admin-divider"></div>
+
+        <div class="admin-row">
+          <label>Add Pet</label>
+          <input type="text" id="admin-pet-id" placeholder="pet id e.g. puppy">
+          <button class="admin-apply" onclick="adminAddPet()">Add</button>
+        </div>
+
+        <div class="admin-row">
+          <label>Tap Bonus</label>
+          <input type="number" id="admin-tap-bonus" placeholder="e.g. 99">
+          <button class="admin-apply" onclick="adminSetTapBonus()">Set</button>
+        </div>
+
+        <div class="admin-row-full">
+          <label>Quick Tap Presets</label>
+          <div class="admin-presets">
+            <button class="admin-preset" onclick="adminSetTapBonus(0)">Reset ×1</button>
+            <button class="admin-preset" onclick="adminSetTapBonus(9)">×10</button>
+            <button class="admin-preset" onclick="adminSetTapBonus(99)">×100</button>
+            <button class="admin-preset" onclick="adminSetTapBonus(999)">×1K</button>
+            <button class="admin-preset" onclick="adminSetTapBonus(99999)">×100K</button>
+          </div>
+        </div>
+
+        <div class="admin-divider"></div>
+        <div class="admin-toggle-row">
+          <span class="admin-toggle-label">🍀 Set Luck Multiplier</span>
+        </div>
+        <div class="admin-row-full">
+          <div class="admin-presets">
+            <button class="admin-preset" onclick="adminSetLuck(1)">1× (reset)</button>
+            <button class="admin-preset" onclick="adminSetLuck(2)">2×</button>
+            <button class="admin-preset" onclick="adminSetLuck(3)">3×</button>
+            <button class="admin-preset" onclick="adminSetLuck(5)">5× (max)</button>
+            <button class="admin-preset" onclick="adminSetLuck(99)">99× (test)</button>
+          </div>
+        </div>
+
+        <div class="admin-divider"></div>
+        <div class="admin-toggle-row">
+          <span class="admin-toggle-label">🌟 Give Secret Pet</span>
+        </div>
+        <div class="admin-row-full">
+          <div class="admin-presets" id="admin-secret-presets"></div>
+        </div>
+
+        <div class="admin-divider"></div>
+        <div style="font-size:9px;color:var(--muted);text-align:center;padding-bottom:4px;">Changes apply instantly. Save to persist.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="notify"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════
+// EGGS — 16 eggs, tighter pet mult scaling, harder costs
+//
+// Pet mult philosophy:
+//   common  = base tier mult
+//   uncommon = 1.5–2× common
+//   rare     = 2.5–4× common
+//   epic     = 5–8× common
+//   legendary= 10–20× common
+//   mythic   = ultra rare (1/500–1/2000), 30–50× common
+//
+// Tap upgrade formula:
+//   perTap = petPower × (1 + sumOfBonuses)
+//   e.g. petPower=50, bonuses bought = [+2,+4] → 50×(1+6)=350
+// ══════════════════════════════════════════════════════════════════
+
+const EGGS = [
+  // ─── TIER 1 ───
+  {
+    id:'starter', name:'Starter Egg', emoji:'🥚', cost:10,
+    pets:[
+      {id:'puppy',   name:'Puppy',  emoji:'🐶', rarity:'common',   chance:3300, mult:2},
+      {id:'kitten',  name:'Kitten', emoji:'🐱', rarity:'common',   chance:3300, mult:2},
+      {id:'bunny',   name:'Bunny',  emoji:'🐰', rarity:'uncommon', chance:2000, mult:3},
+      {id:'cub',     name:'Bear Cub',emoji:'🐻', rarity:'rare',    chance:1200, mult:4},
+      {id:'goldfox', name:'Gold Fox',emoji:'🦊', rarity:'epic',    chance:180,  mult:6},
+      {id:'unicorn', name:'Unicorn', emoji:'🦄', rarity:'legendary',chance:20,  mult:10},
+      {id:'starter_secret',name:'???',emoji:'🌟',rarity:'secret',  chance:1,   mult:50},
+    ]
+  },
+  {
+    id:'farm', name:'Farm Egg', emoji:'🌾', cost:500,
+    pets:[
+      {id:'chick',  name:'Chick',   emoji:'🐣', rarity:'common',   chance:3200, mult:3},
+      {id:'piglet', name:'Piglet',  emoji:'🐷', rarity:'common',   chance:3000, mult:3},
+      {id:'lamb',   name:'Lamb',    emoji:'🐑', rarity:'uncommon', chance:2200, mult:5},
+      {id:'bull',   name:'Bull',    emoji:'🐂', rarity:'rare',     chance:1200, mult:7},
+      {id:'rooster',name:'Rooster', emoji:'🐓', rarity:'epic',     chance:350,  mult:12},
+      {id:'goldbull',name:'Gold Bull',emoji:'🏅',rarity:'legendary',chance:50,  mult:18},
+      {id:'farm_secret',name:'???',  emoji:'🐉',rarity:'secret',   chance:1,   mult:90},
+    ]
+  },
+  // ─── TIER 2 ───
+  {
+    id:'forest', name:'Forest Egg', emoji:'🌿', cost:3000,
+    pets:[
+      {id:'fox',     name:'Fox',    emoji:'🦊', rarity:'common',   chance:3200, mult:4},
+      {id:'deer',    name:'Deer',   emoji:'🦌', rarity:'common',   chance:2800, mult:5},
+      {id:'wolf',    name:'Wolf',   emoji:'🐺', rarity:'uncommon', chance:2200, mult:8},
+      {id:'panther', name:'Panther',emoji:'🐆', rarity:'rare',     chance:1300, mult:12},
+      {id:'gryphon', name:'Gryphon',emoji:'🦅', rarity:'epic',     chance:400,  mult:20},
+      {id:'treegod', name:'Tree God',emoji:'🌳', rarity:'legendary',chance:90,  mult:32},
+      {id:'ironbark',name:'Ironbark',emoji:'🪵', rarity:'mythic',  chance:10,   mult:55},
+      {id:'forest_secret',name:'???',emoji:'🌈',rarity:'secret',   chance:1,    mult:200},
+    ]
+  },
+  {
+    id:'jungle', name:'Jungle Egg', emoji:'🌴', cost:12000,
+    pets:[
+      {id:'parrot',  name:'Parrot',  emoji:'🦜', rarity:'common',   chance:3000, mult:6},
+      {id:'monkey',  name:'Monkey',  emoji:'🐒', rarity:'common',   chance:2800, mult:7},
+      {id:'tiger',   name:'Tiger',   emoji:'🐯', rarity:'uncommon', chance:2200, mult:11},
+      {id:'gorilla', name:'Gorilla', emoji:'🦍', rarity:'rare',     chance:1500, mult:17},
+      {id:'viper',   name:'Viper',   emoji:'🐍', rarity:'epic',     chance:400,  mult:28},
+      {id:'jaguar',  name:'Jaguar',  emoji:'🐅', rarity:'legendary',chance:95,   mult:45},
+      {id:'bakunawa',name:'Bakunawa',emoji:'🌿', rarity:'mythic',   chance:5,    mult:90},
+      {id:'jungle_secret',name:'???',emoji:'🦋',rarity:'secret',   chance:1,    mult:400},
+    ]
+  },
+  // ─── TIER 3 ───
+  {
+    id:'ocean', name:'Ocean Egg', emoji:'🌊', cost:50000,
+    pets:[
+      {id:'clownfish',name:'Clownfish',emoji:'🐠', rarity:'common',   chance:2900, mult:9},
+      {id:'turtle',   name:'Turtle',   emoji:'🐢', rarity:'common',   chance:2700, mult:10},
+      {id:'dolphin',  name:'Dolphin',  emoji:'🐬', rarity:'uncommon', chance:2300, mult:16},
+      {id:'shark',    name:'Shark',    emoji:'🦈', rarity:'rare',     chance:1500, mult:25},
+      {id:'orca',     name:'Orca',     emoji:'🐋', rarity:'epic',     chance:500,  mult:40},
+      {id:'leviathan',name:'Leviathan',emoji:'🐳', rarity:'legendary',chance:90,   mult:65},
+      {id:'poseidon', name:'Poseidon', emoji:'🔱', rarity:'mythic',   chance:10,   mult:120},
+      {id:'ocean_secret',name:'???',  emoji:'🐙',rarity:'secret',   chance:1,    mult:600},
+    ]
+  },
+  {
+    id:'deep', name:'Deep Sea Egg', emoji:'🌑', cost:200000,
+    pets:[
+      {id:'anglerfish',name:'Anglerfish',emoji:'🎣', rarity:'common',   chance:2700, mult:12},
+      {id:'crab',      name:'Crab',       emoji:'🦀', rarity:'common',   chance:2500, mult:13},
+      {id:'squid',     name:'Squid',      emoji:'🦑', rarity:'uncommon', chance:2300, mult:20},
+      {id:'kraken',    name:'Kraken',     emoji:'🐙', rarity:'rare',     chance:1700, mult:32},
+      {id:'seaserpent',name:'Sea Serpent',emoji:'🐉', rarity:'epic',     chance:600,  mult:52},
+      {id:'abysslord', name:'Abyss Lord', emoji:'🌀', rarity:'legendary',chance:190,  mult:85},
+      {id:'thalassus', name:'Thalassus',  emoji:'💧', rarity:'mythic',   chance:10,   mult:160},
+      {id:'deep_secret',  name:'???',        emoji:'🦑', rarity:'secret',   chance:1,    mult:900},
+    ]
+  },
+  // ─── TIER 4 ───
+  {
+    id:'volcano', name:'Volcano Egg', emoji:'🌋', cost:800000,
+    pets:[
+      {id:'salamander',name:'Salamander',emoji:'🦎', rarity:'common',   chance:2600, mult:16},
+      {id:'magmapup',  name:'Magma Pup', emoji:'🐕', rarity:'common',   chance:2400, mult:18},
+      {id:'emberlion', name:'Ember Lion',emoji:'🦁', rarity:'uncommon', chance:2300, mult:28},
+      {id:'lavabear',  name:'Lava Bear', emoji:'🐻', rarity:'rare',     chance:1700, mult:42},
+      {id:'infernox',  name:'Infernox',  emoji:'🔥', rarity:'epic',     chance:700,  mult:68},
+      {id:'phoenix',   name:'Phoenix',   emoji:'🦅', rarity:'legendary',chance:270,  mult:110},
+      {id:'ignis',     name:'Ignis God', emoji:'🌋', rarity:'mythic',   chance:30,   mult:200},
+      {id:'volcano_secret',name:'???',      emoji:'🐦', rarity:'secret',   chance:1,    mult:1200},
+    ]
+  },
+  {
+    id:'arctic', name:'Arctic Egg', emoji:'❄️', cost:3000000,
+    pets:[
+      {id:'penguin',  name:'Penguin',  emoji:'🐧', rarity:'common',   chance:2600, mult:22},
+      {id:'seal',     name:'Seal',     emoji:'🦭', rarity:'common',   chance:2400, mult:24},
+      {id:'polarbear',name:'Polar Bear',emoji:'🐼', rarity:'uncommon', chance:2300, mult:36},
+      {id:'snowwolf',  name:'Snow Wolf',emoji:'🐺', rarity:'rare',     chance:1700, mult:55},
+      {id:'frostdrake',name:'Frost Drake',emoji:'🐲',rarity:'epic',   chance:700,  mult:88},
+      {id:'yeti',      name:'Yeti',    emoji:'❄️', rarity:'legendary',chance:270,  mult:145},
+      {id:'aurorex',   name:'Aurorex', emoji:'🌌', rarity:'mythic',   chance:30,   mult:270},
+      {id:'arctic_secret', name:'???',    emoji:'❄️', rarity:'secret',   chance:1,    mult:1800},
+    ]
+  },
+  // ─── TIER 5 ───
+  {
+    id:'sky', name:'Sky Egg', emoji:'☁️', cost:10000000,
+    pets:[
+      {id:'sparrow',  name:'Sparrow',  emoji:'🐦', rarity:'common',   chance:2500, mult:30},
+      {id:'hawk',     name:'Hawk',     emoji:'🦆', rarity:'common',   chance:2300, mult:33},
+      {id:'thunderbird',name:'Thunderbird',emoji:'⚡',rarity:'uncommon',chance:2300,mult:50},
+      {id:'stormdrake',name:'Storm Drake',emoji:'🌩️',rarity:'rare',   chance:1700, mult:78},
+      {id:'cloudgod',  name:'Cloud God',emoji:'⛅', rarity:'epic',     chance:800,  mult:125},
+      {id:'zeus',      name:'Zeus',    emoji:'🌪️', rarity:'legendary',chance:360,  mult:200},
+      {id:'aeolus',    name:'Aeolus',  emoji:'🌬️', rarity:'mythic',   chance:40,   mult:380},
+      {id:'sky_secret',    name:'???',    emoji:'🌪️', rarity:'secret',   chance:1,    mult:2500},
+    ]
+  },
+  {
+    id:'space', name:'Space Egg', emoji:'🚀', cost:50000000,
+    pets:[
+      {id:'astropup',  name:'Astro Pup',emoji:'🐕', rarity:'common',   chance:2400, mult:42},
+      {id:'cosmocat',  name:'Cosmo Cat',emoji:'🐈', rarity:'common',   chance:2200, mult:46},
+      {id:'nebulafox',  name:'Nebula Fox',emoji:'🌠',rarity:'uncommon', chance:2300, mult:70},
+      {id:'comet',     name:'Comet',    emoji:'☄️', rarity:'rare',     chance:1800, mult:110},
+      {id:'blackhole', name:'Black Hole',emoji:'🕳️',rarity:'epic',     chance:800,  mult:175},
+      {id:'starlord',  name:'Star Lord',emoji:'💫', rarity:'legendary',chance:460,  mult:280},
+      {id:'cosmosgod', name:'Cosmos God',emoji:'🌌',rarity:'mythic',   chance:40,   mult:520},
+      {id:'space_secret',  name:'???',    emoji:'👽', rarity:'secret',   chance:1,    mult:4000},
+    ]
+  },
+  // ─── TIER 6 ───
+  {
+    id:'celestial', name:'Celestial Egg', emoji:'✨', cost:250000000,
+    pets:[
+      {id:'starling', name:'Starling', emoji:'🌟', rarity:'common',   chance:2200, mult:60},
+      {id:'mooncat',  name:'Moon Cat', emoji:'🌙', rarity:'common',   chance:2000, mult:65},
+      {id:'solarbear',name:'Solar Bear',emoji:'☀️', rarity:'uncommon', chance:2300, mult:100},
+      {id:'celestiox',name:'Celestiox',emoji:'🌠', rarity:'rare',     chance:2000, mult:160},
+      {id:'divinedrake',name:'Divine Drake',emoji:'🐉',rarity:'epic', chance:1000, mult:260},
+      {id:'angelion',  name:'Angelion',emoji:'👼', rarity:'legendary',chance:460,  mult:420},
+      {id:'seraphim',  name:'Seraphim',emoji:'✨', rarity:'mythic',   chance:40,   mult:800},
+      {id:'celest_secret', name:'???',    emoji:'💫', rarity:'secret',   chance:1,    mult:7000},
+    ]
+  },
+  {
+    id:'void', name:'Void Egg', emoji:'🌑', cost:1000000000,
+    pets:[
+      {id:'shadow',   name:'Shadow',   emoji:'👥', rarity:'common',   chance:2000, mult:85},
+      {id:'specter',  name:'Specter',  emoji:'👻', rarity:'common',   chance:1800, mult:95},
+      {id:'rift',     name:'Rift Beast',emoji:'🔮',rarity:'uncommon', chance:2200, mult:150},
+      {id:'voidwolf', name:'Void Wolf', emoji:'🌀', rarity:'rare',    chance:2200, mult:240},
+      {id:'nulldrake', name:'Null Drake',emoji:'🖤',rarity:'epic',    chance:1200, mult:380},
+      {id:'voidlord',  name:'Void Lord',emoji:'⚫',rarity:'legendary',chance:560,  mult:600},
+      {id:'annihilator',name:'Annihilator',emoji:'💠',rarity:'mythic', chance:40,  mult:1100},
+      {id:'void_secret',   name:'???',    emoji:'🌀', rarity:'secret',   chance:1,    mult:12000},
+    ]
+  },
+  // ─── TIER 7 (ultra rare) ───
+  {
+    id:'divine', name:'Divine Egg', emoji:'👑', cost:5000000000,
+    pets:[
+      {id:'divcat',   name:'Divine Cat',  emoji:'😺', rarity:'rare',     chance:3500, mult:1000},
+      {id:'divdog',   name:'Divine Dog',  emoji:'😻', rarity:'rare',     chance:3000, mult:1150},
+      {id:'holywolf', name:'Holy Wolf',   emoji:'🐺', rarity:'epic',     chance:2000, mult:1900},
+      {id:'godbird',  name:'God Bird',    emoji:'🦅', rarity:'legendary',chance:1300, mult:3100},
+      {id:'pantheon', name:'Pantheon',    emoji:'👑', rarity:'mythic',   chance:190,  mult:1200},
+      {id:'creator',  name:'The Creator',emoji:'🌈', rarity:'mythic',   chance:10,   mult:2500},
+      {id:'divine_secret', name:'???',    emoji:'⚡', rarity:'secret',   chance:1,    mult:25000},
+    ]
+  },
+  {
+    id:'abyss', name:'Abyss Egg', emoji:'⚫', cost:20000000000,
+    pets:[
+      {id:'darkpup',  name:'Dark Pup',   emoji:'🐶', rarity:'rare',     chance:3200, mult:300},
+      {id:'umbra',    name:'Umbra',      emoji:'🌑', rarity:'epic',     chance:2800, mult:480},
+      {id:'oblivion', name:'Oblivion',   emoji:'🔲', rarity:'epic',     chance:2200, mult:600},
+      {id:'doomlord', name:'Doom Lord',  emoji:'💀', rarity:'legendary',chance:1500, mult:950},
+      {id:'abysspet', name:'Abyss Pet',  emoji:'⚫', rarity:'mythic',   chance:290,  mult:1800},
+      {id:'nothingness',name:'Nothingness',emoji:'🕳️',rarity:'mythic', chance:10,   mult:4000},
+      {id:'abyss_secret',  name:'???',    emoji:'🌑', rarity:'secret',   chance:1,    mult:50000},
+    ]
+  },
+  {
+    id:'omega', name:'Omega Egg', emoji:'Ω', cost:100000000000,
+    pets:[
+      {id:'omegapup', name:'Omega Pup',  emoji:'🔱', rarity:'epic',     chance:3000, mult:700},
+      {id:'omegalion',name:'Omega Lion', emoji:'🦁', rarity:'legendary',chance:2500, mult:1200},
+      {id:'omegadrake',name:'Omega Drake',emoji:'🐲',rarity:'legendary',chance:2000, mult:1600},
+      {id:'theone',   name:'The One',    emoji:'💠', rarity:'mythic',   chance:450,  mult:3000},
+      {id:'infinity', name:'Infinity',   emoji:'♾️', rarity:'mythic',   chance:49,   mult:7000},
+      {id:'omnipet',  name:'Omnipet',    emoji:'🌌', rarity:'mythic',   chance:1,    mult:20000},
+      {id:'omega_secret',  name:'???',    emoji:'Ω',  rarity:'secret',   chance:1,    mult:200000},
+    ]
+  },
+  {
+    id:'genesis', name:'Genesis Egg', emoji:'🌅', cost:1000000000000,
+    pets:[
+      {id:'genesis1', name:'Origin',     emoji:'🌱', rarity:'legendary',chance:3000, mult:2000},
+      {id:'genesis2', name:'Primordial', emoji:'🌊', rarity:'legendary',chance:2500, mult:3000},
+      {id:'genesis3', name:'Eternal',    emoji:'⏳', rarity:'mythic',   chance:2000, mult:5500},
+      {id:'genesis4', name:'Absolute',   emoji:'🌅', rarity:'mythic',   chance:1500, mult:10000},
+      {id:'genesis5', name:'Transcendent',emoji:'💫',rarity:'mythic',  chance:499,  mult:25000},
+      {id:'genesis6', name:'God Itself', emoji:'☀️', rarity:'mythic',   chance:1,    mult:100000},
+      {id:'genesis_secret',name:'???',    emoji:'🌅', rarity:'secret',   chance:1,    mult:1000000},
+    ]
+  },
+
+  // ─── TIER 8 ───
+  {
+    id:'dawn', name:'Dawn Egg', emoji:'🌄', cost:5000000000000,
+    pets:[
+      {id:'dawnbird',  name:'Dawn Bird',  emoji:'🌄', rarity:'common',   chance:2800, mult:3500},
+      {id:'sunpup',    name:'Sun Pup',    emoji:'🌞', rarity:'common',   chance:2400, mult:4000},
+      {id:'raycat',    name:'Ray Cat',    emoji:'😸', rarity:'uncommon', chance:2300, mult:6500},
+      {id:'solaris',   name:'Solaris',    emoji:'☀️', rarity:'rare',     chance:1700, mult:10000},
+      {id:'aurora',    name:'Aurora',     emoji:'🌈', rarity:'epic',     chance:700,  mult:17000},
+      {id:'dawnlord',  name:'Dawn Lord',  emoji:'🌅', rarity:'legendary',chance:90,   mult:28000},
+      {id:'firstlight',name:'First Light',emoji:'✨', rarity:'mythic',   chance:10,   mult:55000},
+      {id:'dawn_secret',   name:'???',    emoji:'🌄', rarity:'secret',   chance:1,    mult:500000},
+    ]
+  },
+  {
+    id:'dream', name:'Dream Egg', emoji:'💭', cost:25000000000000,
+    pets:[
+      {id:'dreampup',  name:'Dream Pup',  emoji:'🐶', rarity:'common',   chance:2700, mult:5000},
+      {id:'slumber',   name:'Slumber',    emoji:'😴', rarity:'common',   chance:2300, mult:5500},
+      {id:'phantom',   name:'Phantom',    emoji:'👻', rarity:'uncommon', chance:2300, mult:9000},
+      {id:'mirage',    name:'Mirage',     emoji:'🌫️', rarity:'rare',     chance:1900, mult:14000},
+      {id:'dreamon',   name:'Dreamon',    emoji:'💫', rarity:'epic',     chance:600,  mult:24000},
+      {id:'nightmare', name:'Nightmare',  emoji:'🌙', rarity:'legendary',chance:190,  mult:40000},
+      {id:'dreambeast',name:'Dream Beast',emoji:'💭', rarity:'mythic',   chance:10,   mult:80000},
+      {id:'dream_secret',  name:'???',    emoji:'😴', rarity:'secret',   chance:1,    mult:800000},
+    ]
+  },
+  // ─── TIER 9 ───
+  {
+    id:'galaxy', name:'Galaxy Egg', emoji:'🌌', cost:150000000000000,
+    pets:[
+      {id:'starcat',   name:'Star Cat',   emoji:'🐱', rarity:'common',   chance:2600, mult:7000},
+      {id:'galaxypup', name:'Galaxy Pup', emoji:'🐶', rarity:'common',   chance:2300, mult:8000},
+      {id:'quasar',    name:'Quasar',     emoji:'🌠', rarity:'uncommon', chance:2300, mult:13000},
+      {id:'pulsar',    name:'Pulsar',     emoji:'⭐', rarity:'rare',     chance:1900, mult:20000},
+      {id:'galactic',  name:'Galactic',   emoji:'🌌', rarity:'epic',     chance:600,  mult:34000},
+      {id:'galaxygod', name:'Galaxy God', emoji:'🔭', rarity:'legendary',chance:290,  mult:56000},
+      {id:'universe',  name:'Universe',   emoji:'🪐', rarity:'mythic',   chance:10,   mult:110000},
+      {id:'galaxy_secret', name:'???',    emoji:'🌌', rarity:'secret',   chance:1,    mult:1100000},
+    ]
+  },
+  {
+    id:'time', name:'Time Egg', emoji:'⌛', cost:800000000000000,
+    pets:[
+      {id:'clockcat',  name:'Clock Cat',  emoji:'🐱', rarity:'common',   chance:2500, mult:10000},
+      {id:'timedog',   name:'Time Dog',   emoji:'🐶', rarity:'common',   chance:2200, mult:11000},
+      {id:'temporal',  name:'Temporal',   emoji:'⏱️', rarity:'uncommon', chance:2300, mult:18000},
+      {id:'epoch',     name:'Epoch',      emoji:'📅', rarity:'rare',     chance:1900, mult:28000},
+      {id:'chrono',    name:'Chrono',     emoji:'⏳', rarity:'epic',     chance:700,  mult:48000},
+      {id:'timelord2', name:'Time Lord',  emoji:'⌛', rarity:'legendary',chance:380,  mult:80000},
+      {id:'eternity',  name:'Eternity',   emoji:'♾️', rarity:'mythic',   chance:20,   mult:160000},
+    ]
+  },
+  // ─── TIER 10 ───
+  {
+    id:'soult10', name:'Soul Egg', emoji:'👁️', cost:5e15,
+    pets:[
+      {id:'soulpup',   name:'Soul Pup',   emoji:'🐶', rarity:'common',   chance:2400, mult:700000},
+      {id:'spiritcat', name:'Spirit Cat', emoji:'🐱', rarity:'common',   chance:2100, mult:800000},
+      {id:'essence',   name:'Essence',    emoji:'✨', rarity:'uncommon', chance:2300, mult:1300000},
+      {id:'soulfire',  name:'Soul Fire',  emoji:'🔥', rarity:'rare',     chance:1900, mult:2000000},
+      {id:'souldrake', name:'Soul Drake', emoji:'🐉', rarity:'epic',     chance:800,  mult:68000},
+      {id:'soullord',  name:'Soul Lord',  emoji:'👁️', rarity:'legendary',chance:480,  mult:115000},
+      {id:'soulofgod', name:'Soul of God',emoji:'💠', rarity:'mythic',   chance:20,   mult:230000},
+    ]
+  },
+  {
+    id:'rune', name:'Rune Egg', emoji:'🔣', cost:80000,
+    pets:[
+      {id:'runecat',   name:'Rune Cat',   emoji:'🐱', rarity:'common',   chance:2300, mult:400000},
+      {id:'runepup',   name:'Rune Pup',   emoji:'🐶', rarity:'common',   chance:2000, mult:440000},
+      {id:'sigil',     name:'Sigil',      emoji:'🔣', rarity:'uncommon', chance:2300, mult:720000},
+      {id:'glyph',     name:'Glyph',      emoji:'🔤', rarity:'rare',     chance:2000, mult:1120000},
+      {id:'arcane',    name:'Arcane',     emoji:'🔮', rarity:'epic',     chance:900,  mult:95000},
+      {id:'runemaster',name:'Runemaster', emoji:'📜', rarity:'legendary',chance:480,  mult:160000},
+      {id:'runegod',   name:'Rune God',   emoji:'⚜️', rarity:'mythic',   chance:20,   mult:320000},
+    ]
+  },
+  // ─── TIER 11 ───
+  {
+    id:'chaos', name:'Chaos Egg', emoji:'🌀', cost:300000,
+    pets:[
+      {id:'chaospup',  name:'Chaos Pup',  emoji:'🐶', rarity:'uncommon', chance:3500, mult:600000},
+      {id:'chaoscat',  name:'Chaos Cat',  emoji:'🐱', rarity:'uncommon', chance:3000, mult:700000},
+      {id:'disorder',  name:'Disorder',   emoji:'🌀', rarity:'rare',     chance:1800, mult:1200000},
+      {id:'entropy',   name:'Entropy',    emoji:'💢', rarity:'epic',     chance:1000, mult:2000000},
+      {id:'maelstrom', name:'Maelstrom',  emoji:'🌪️', rarity:'legendary',chance:660,  mult:170000},
+      {id:'chaoslord', name:'Chaos Lord', emoji:'👿', rarity:'mythic',   chance:40,   mult:380000},
+    ]
+  },
+  {
+    id:'order', name:'Order Egg', emoji:'⚖️', cost:700000,
+    pets:[
+      {id:'ordercat',  name:'Order Cat',  emoji:'🐱', rarity:'uncommon', chance:3300, mult:900000},
+      {id:'orderpup',  name:'Order Pup',  emoji:'🐶', rarity:'uncommon', chance:3000, mult:1000000},
+      {id:'balance',   name:'Balance',    emoji:'⚖️', rarity:'rare',     chance:1700, mult:1700000},
+      {id:'harmony',   name:'Harmony',    emoji:'☯️', rarity:'epic',     chance:1000, mult:2800000},
+      {id:'absolute2', name:'Absolute',   emoji:'🌟', rarity:'legendary',chance:960,  mult:240000},
+      {id:'ordergod',  name:'Order God',  emoji:'⚡', rarity:'mythic',   chance:40,   mult:550000},
+    ]
+  },
+  // ─── TIER 12 (endgame) ───
+  {
+    id:'infinity2', name:'Infinity Egg', emoji:'♾️', cost:3000000,
+    pets:[
+      {id:'inflion',   name:'Infin-lion', emoji:'🦁', rarity:'rare',     chance:3500, mult:2000000},
+      {id:'infdrake',  name:'Infin-Drake',emoji:'🐲', rarity:'epic',     chance:2800, mult:3500000},
+      {id:'endless',   name:'Endless',    emoji:'🔄', rarity:'legendary',chance:2000, mult:6000000},
+      {id:'boundless', name:'Boundless',  emoji:'♾️', rarity:'mythic',   chance:1690, mult:12000000},
+      {id:'allpet',    name:'All-Pet',    emoji:'💫', rarity:'mythic',   chance:10,   mult:2000000},
+    ]
+  },
+  {
+    id:'beyond', name:'Beyond Egg', emoji:'🔮', cost:2e15,
+    pets:[
+      {id:'beyondcat', name:'Beyond Cat', emoji:'😻', rarity:'epic',     chance:3500, mult:2000000},
+      {id:'beyonddog', name:'Beyond Dog', emoji:'🐶', rarity:'epic',     chance:3000, mult:2400000},
+      {id:'realm',     name:'Realm',      emoji:'🔮', rarity:'legendary',chance:2000, mult:4000000},
+      {id:'multiverse',name:'Multiverse', emoji:'🌐', rarity:'mythic',   chance:1490, mult:8000000},
+      {id:'godpet',    name:'God Pet',    emoji:'👑', rarity:'mythic',   chance:10,   mult:5000000},
+    ]
+  },
+  // ─── TIER 11 ───
+  {
+    id:'nature', name:'Nature Egg', emoji:'🍃', cost:1.2e16,
+    pets:[
+      {id:'leafcat',   name:'Leaf Cat',   emoji:'🐱', rarity:'common',   chance:3000, mult:3200000},
+      {id:'vinedog',   name:'Vine Dog',   emoji:'🐶', rarity:'common',   chance:2700, mult:3600000},
+      {id:'sprout',    name:'Sprout',     emoji:'🌱', rarity:'uncommon', chance:2300, mult:6000000},
+      {id:'thornbeast',name:'Thorn Beast',emoji:'🌵', rarity:'rare',     chance:1500, mult:9600000},
+      {id:'naturegod', name:'Nature God', emoji:'🌿', rarity:'epic',     chance:400,  mult:2000000},
+      {id:'gaia',      name:'Gaia',       emoji:'🌍', rarity:'legendary',chance:90,   mult:3500000},
+      {id:'worldtree', name:'World Tree', emoji:'🌳', rarity:'mythic',   chance:10,   mult:7000000},
+    ]
+  },
+  {
+    id:'storm', name:'Storm Egg', emoji:'⛈️', cost:7e16,
+    pets:[
+      {id:'thunderpup',name:'Thunder Pup',emoji:'🐶', rarity:'common',   chance:2900, mult:4800000},
+      {id:'lightningcat',name:'Lightning Cat',emoji:'🐱',rarity:'common',chance:2600, mult:5600000},
+      {id:'cyclone',   name:'Cyclone',    emoji:'🌀', rarity:'uncommon', chance:2300, mult:8800000},
+      {id:'tempest',   name:'Tempest',    emoji:'🌪️', rarity:'rare',     chance:1500, mult:14400000},
+      {id:'stormdrake2',name:'Storm Drake',emoji:'🐉', rarity:'epic',     chance:500,  mult:3000000},
+      {id:'raijin',    name:'Raijin',     emoji:'⚡', rarity:'legendary',chance:190,  mult:5000000},
+      {id:'stormlord', name:'Storm Lord', emoji:'⛈️', rarity:'mythic',   chance:10,   mult:10000000},
+    ]
+  },
+  // ─── TIER 12 ───
+  {
+    id:'crystal', name:'Crystal Egg', emoji:'💎', cost:4e17,
+    pets:[
+      {id:'gemstonepup',name:'Gemstone Pup',emoji:'🐶',rarity:'common',  chance:2800, mult:4500000},
+      {id:'crystalcat',name:'Crystal Cat',emoji:'🐱', rarity:'common',   chance:2500, mult:5000000},
+      {id:'amethyst',  name:'Amethyst',   emoji:'🔮', rarity:'uncommon', chance:2300, mult:8000000},
+      {id:'sapphire',  name:'Sapphire',   emoji:'💙', rarity:'rare',     chance:1600, mult:13000000},
+      {id:'emerald',   name:'Emerald',    emoji:'💚', rarity:'epic',     chance:600,  mult:4300000},
+      {id:'diamond',   name:'Diamond',    emoji:'💎', rarity:'legendary',chance:190,  mult:7000000},
+      {id:'prismatic', name:'Prismatic',  emoji:'🌈', rarity:'mythic',   chance:10,   mult:14000000},
+    ]
+  },
+  {
+    id:'shadow', name:'Shadow Egg', emoji:'🌑', cost:2.5e18,
+    pets:[
+      {id:'darkcat',   name:'Dark Cat',   emoji:'🐈', rarity:'common',   chance:2700, mult:1300000},
+      {id:'shadedog',  name:'Shade Dog',  emoji:'🐕', rarity:'common',   chance:2400, mult:1500000},
+      {id:'umbrapup',  name:'Umbra Pup',  emoji:'👻', rarity:'uncommon', chance:2300, mult:2400000},
+      {id:'nocturn',   name:'Nocturn',    emoji:'🌑', rarity:'rare',     chance:1700, mult:3800000},
+      {id:'darkdrake', name:'Dark Drake', emoji:'🖤', rarity:'epic',     chance:600,  mult:6200000},
+      {id:'oblivious', name:'Oblivious',  emoji:'🕳️', rarity:'legendary',chance:290,  mult:10000000},
+      {id:'voidshade', name:'Void Shade', emoji:'⚫', rarity:'mythic',   chance:10,   mult:20000000},
+    ]
+  },
+  // ─── TIER 13 ───
+  {
+    id:'fire', name:'Flame Egg', emoji:'🔥', cost:1.5e19,
+    pets:[
+      {id:'emberpup',  name:'Ember Pup',  emoji:'🐶', rarity:'common',   chance:2600, mult:9500000},
+      {id:'blaze',     name:'Blaze Cat',  emoji:'🐱', rarity:'common',   chance:2300, mult:11000000},
+      {id:'infernodog',name:'Inferno Dog',emoji:'🔥', rarity:'uncommon', chance:2300, mult:17500000},
+      {id:'cinderbird',name:'Cinder Bird',emoji:'🦅', rarity:'rare',     chance:1900, mult:27500000},
+      {id:'pyrex',     name:'Pyrex',      emoji:'🌋', rarity:'epic',     chance:700,  mult:9000000},
+      {id:'flamegod',  name:'Flame God',  emoji:'☀️', rarity:'legendary',chance:190,  mult:14500000},
+      {id:'solflare',  name:'Sol Flare',  emoji:'🌞', rarity:'mythic',   chance:10,   mult:30000000},
+    ]
+  },
+  {
+    id:'ice', name:'Frozen Egg', emoji:'🧊', cost:9e19,
+    pets:[
+      {id:'frostpup',  name:'Frost Pup',  emoji:'🐶', rarity:'common',   chance:2500, mult:14000000},
+      {id:'blizzardcat',name:'Blizzard Cat',emoji:'🐱',rarity:'common',  chance:2200, mult:16000000},
+      {id:'snowflake', name:'Snowflake',  emoji:'❄️', rarity:'uncommon', chance:2300, mult:25500000},
+      {id:'glacial',   name:'Glacial',    emoji:'🧊', rarity:'rare',     chance:2000, mult:40000000},
+      {id:'icedrake',  name:'Ice Drake',  emoji:'🐲', rarity:'epic',     chance:700,  mult:13000000},
+      {id:'icegoddess',name:'Ice Goddess',emoji:'🌨️', rarity:'legendary',chance:290,  mult:21000000},
+      {id:'absolute0', name:'Absolute 0', emoji:'⬜', rarity:'mythic',   chance:10,   mult:42000000},
+    ]
+  },
+  // ─── TIER 14 ───
+  {
+    id:'mind', name:'Mind Egg', emoji:'🧠', cost:5e20,
+    pets:[
+      {id:'psychicat', name:'Psychi-Cat', emoji:'🐱', rarity:'common',   chance:2400, mult:12600000},
+      {id:'telepup',   name:'Tele-Pup',   emoji:'🐶', rarity:'common',   chance:2100, mult:14400000},
+      {id:'psyche',    name:'Psyche',     emoji:'🧠', rarity:'uncommon', chance:2300, mult:22500000},
+      {id:'oracle',    name:'Oracle',     emoji:'🔮', rarity:'rare',     chance:2000, mult:36000000},
+      {id:'mindlord',  name:'Mind Lord',  emoji:'💭', rarity:'epic',     chance:900,  mult:20000000},
+      {id:'omniscient',name:'Omniscient', emoji:'👁️', rarity:'legendary',chance:290,  mult:32000000},
+      {id:'thoughtgod',name:'Thought God',emoji:'✨', rarity:'mythic',   chance:10,   mult:65000000},
+    ]
+  },
+  {
+    id:'soul', name:'Soul Egg', emoji:'💫', cost:3e21,
+    pets:[
+      {id:'spiritpup',  name:'Spirit Pup', emoji:'🐶', rarity:'common',   chance:2300, mult:18600000},
+      {id:'soulcat',    name:'Soul Cat',   emoji:'🐱', rarity:'common',   chance:2000, mult:21000000},
+      {id:'essencet15', name:'Essence',    emoji:'💫', rarity:'uncommon', chance:2300, mult:33000000},
+      {id:'astral',     name:'Astral',     emoji:'🌟', rarity:'rare',     chance:2100, mult:54000000},
+      {id:'soulgod',    name:'Soul God',   emoji:'🕊️', rarity:'epic',     chance:1000, mult:87000000},
+      {id:'eternal',    name:'Eternal',    emoji:'♾️', rarity:'legendary',chance:290,  mult:48000000},
+      {id:'immortal',   name:'Immortal',   emoji:'👼', rarity:'mythic',   chance:10,   mult:95000000},
+    ]
+  },
+  // ─── TIER 15 (true endgame) ───
+  {
+    id:'reality', name:'Reality Egg', emoji:'🌐', cost:2e22,
+    pets:[
+      {id:'realdog',   name:'Real Dog',   emoji:'🐕', rarity:'rare',     chance:3000, mult:270000000},
+      {id:'realcat',   name:'Real Cat',   emoji:'🐈', rarity:'rare',     chance:2800, mult:330000000},
+      {id:'paradox',   name:'Paradox',    emoji:'🔁', rarity:'epic',     chance:2200, mult:540000000},
+      {id:'simulation',name:'Simulation', emoji:'🖥️', rarity:'legendary',chance:1700, mult:900000000},
+      {id:'matrixpet', name:'Matrix Pet', emoji:'🌐', rarity:'mythic',   chance:290,  mult:600000000},
+      {id:'existence', name:'Existence',  emoji:'🌌', rarity:'mythic',   chance:10,   mult:2000000000},
+    ]
+  },
+  {
+    id:'truth', name:'Truth Egg', emoji:'⚖️', cost:1.5e23,
+    pets:[
+      {id:'truthpup',  name:'Truth Pup',  emoji:'🐶', rarity:'epic',     chance:3200, mult:4500000000},
+      {id:'truthcat',  name:'Truth Cat',  emoji:'🐱', rarity:'epic',     chance:2800, mult:5400000000},
+      {id:'balancet15',name:'Balance',    emoji:'⚖️', rarity:'legendary',chance:2200, mult:9000000000},
+      {id:'harmonyt15',name:'Harmony',    emoji:'☯️', rarity:'legendary',chance:1500, mult:15000000000},
+      {id:'truthgod',  name:'Truth God',  emoji:'💡', rarity:'mythic',   chance:290,  mult:10000000000},
+      {id:'everything',name:'Everything', emoji:'🌈', rarity:'mythic',   chance:9,    mult:50000000000},
+      {id:'nothing_pet',name:'Nothing',   emoji:'⬛', rarity:'mythic',   chance:1,    mult:500000000000},
+      {id:'truth_secret',name:'???',      emoji:'🌠', rarity:'secret',   chance:1,    mult:2000000000000},
+    ]
+  },
+  // ─── TIER 16 ───
+  {
+    id:'cosmos', name:'Cosmos Egg', emoji:'🪐', cost:2e24,
+    pets:[
+      {id:'cosmospup',   name:'Cosmos Pup',  emoji:'🐶', rarity:'common',   chance:25000, mult:2000000000},
+      {id:'cosmoscat',   name:'Cosmos Cat',  emoji:'🐱', rarity:'common',   chance:22000, mult:2400000000},
+      {id:'starwhale',   name:'Star Whale',  emoji:'🐋', rarity:'uncommon', chance:18000, mult:4000000000},
+      {id:'cosmosdrake', name:'Cosmos Drake',emoji:'🐲', rarity:'rare',     chance:15000, mult:6500000000},
+      {id:'galaxylord',  name:'Galaxy Lord', emoji:'🌌', rarity:'epic',     chance:8000,  mult:11000000000},
+      {id:'cosmicgod',   name:'Cosmic God',  emoji:'🌠', rarity:'legendary',chance:1990,  mult:18000000000},
+      {id:'bigbang',     name:'Big Bang',    emoji:'💥', rarity:'mythic',   chance:990,   mult:40000000000},
+      {id:'cosmos_secret',name:'???',        emoji:'☯️', rarity:'secret',   chance:10,    mult:500000000000},
+    ]
+  },
+  {
+    id:'ancient', name:'Ancient Egg', emoji:'🏺', cost:2e25,
+    pets:[
+      {id:'ancientpup',  name:'Ancient Pup', emoji:'🐕', rarity:'common',   chance:24000, mult:3500000000},
+      {id:'ancientcat',  name:'Ancient Cat', emoji:'🐈', rarity:'common',   chance:21000, mult:4200000000},
+      {id:'sphinx',      name:'Sphinx',      emoji:'🦁', rarity:'uncommon', chance:18000, mult:7000000000},
+      {id:'anubis',      name:'Anubis',      emoji:'🐺', rarity:'rare',     chance:14000, mult:11000000000},
+      {id:'ra',          name:'Ra',          emoji:'☀️', rarity:'epic',     chance:7000,  mult:19000000000},
+      {id:'osiris',      name:'Osiris',      emoji:'👑', rarity:'legendary',chance:1990,  mult:32000000000},
+      {id:'horus',       name:'Horus',       emoji:'🦅', rarity:'mythic',   chance:990,   mult:70000000000},
+      {id:'ancient_secret',name:'???',       emoji:'🔱', rarity:'secret',   chance:10,    mult:800000000000},
+    ]
+  },
+  // ─── TIER 17 ───
+  {
+    id:'cyber', name:'Cyber Egg', emoji:'🤖', cost:2e26,
+    pets:[
+      {id:'cyberdog',    name:'Cyber Dog',   emoji:'🐶', rarity:'common',   chance:23000, mult:6000000000},
+      {id:'cybercat',    name:'Cyber Cat',   emoji:'🐱', rarity:'common',   chance:20000, mult:7000000000},
+      {id:'android',     name:'Android',     emoji:'🤖', rarity:'uncommon', chance:18000, mult:12000000000},
+      {id:'cyborg',      name:'Cyborg',      emoji:'🦾', rarity:'rare',     chance:13000, mult:19000000000},
+      {id:'neonbeast',   name:'Neon Beast',  emoji:'💡', rarity:'epic',     chance:7000,  mult:32000000000},
+      {id:'matrixgod',   name:'Matrix God',  emoji:'🖥️', rarity:'legendary',chance:1990,  mult:55000000000},
+      {id:'singularity', name:'Singularity', emoji:'♾️', rarity:'mythic',   chance:990,   mult:120000000000},
+      {id:'cyber_secret',name:'???',         emoji:'⚡', rarity:'secret',   chance:10,    mult:1500000000000},
+    ]
+  },
+  {
+    id:'magic', name:'Magic Egg', emoji:'🪄', cost:2e27,
+    pets:[
+      {id:'magicpup',    name:'Magic Pup',   emoji:'🐶', rarity:'common',   chance:22000, mult:10000000000},
+      {id:'wizardcat',   name:'Wizard Cat',  emoji:'🐱', rarity:'common',   chance:19000, mult:12000000000},
+      {id:'sorcerer',    name:'Sorcerer',    emoji:'🧙', rarity:'uncommon', chance:17000, mult:20000000000},
+      {id:'enchanter',   name:'Enchanter',   emoji:'🪄', rarity:'rare',     chance:12000, mult:32000000000},
+      {id:'archmage',    name:'Archmage',    emoji:'🔮', rarity:'epic',     chance:7000,  mult:55000000000},
+      {id:'spellgod',    name:'Spell God',   emoji:'✨', rarity:'legendary',chance:1990,  mult:95000000000},
+      {id:'omnimage',    name:'Omnimage',    emoji:'🌟', rarity:'mythic',   chance:990,   mult:200000000000},
+      {id:'magic_secret',name:'???',         emoji:'🌈', rarity:'secret',   chance:10,    mult:2500000000000},
+    ]
+  },
+  // ─── TIER 18 ───
+  {
+    id:'blood', name:'Blood Egg', emoji:'🩸', cost:2e28,
+    pets:[
+      {id:'bloodhound',  name:'Bloodhound',  emoji:'🐕', rarity:'common',   chance:21000, mult:17000000000},
+      {id:'vampirecat',  name:'Vampire Cat', emoji:'🐱', rarity:'common',   chance:18000, mult:20000000000},
+      {id:'werewolf',    name:'Werewolf',    emoji:'🐺', rarity:'uncommon', chance:16000, mult:34000000000},
+      {id:'dracula',     name:'Dracula',     emoji:'🧛', rarity:'rare',     chance:11000, mult:55000000000},
+      {id:'blooddrake',  name:'Blood Drake', emoji:'🐉', rarity:'epic',     chance:6500,  mult:92000000000},
+      {id:'bloodgod',    name:'Blood God',   emoji:'🩸', rarity:'legendary',chance:1990,  mult:160000000000},
+      {id:'lifedrain',   name:'Life Drain',  emoji:'💀', rarity:'mythic',   chance:990,   mult:340000000000},
+      {id:'blood_secret',name:'???',         emoji:'🌹', rarity:'secret',   chance:10,    mult:4000000000000},
+    ]
+  },
+  {
+    id:'abyss2', name:'Abyss Egg II', emoji:'🌀', cost:2e29,
+    pets:[
+      {id:'tidepup',     name:'Tide Pup',    emoji:'🐶', rarity:'common',   chance:20000, mult:28000000000},
+      {id:'tidecat',     name:'Tide Cat',    emoji:'🐱', rarity:'common',   chance:17000, mult:33000000000},
+      {id:'tsunami',     name:'Tsunami',     emoji:'🌊', rarity:'uncommon', chance:16000, mult:56000000000},
+      {id:'trident',     name:'Trident',     emoji:'🔱', rarity:'rare',     chance:11000, mult:90000000000},
+      {id:'neptune',     name:'Neptune',     emoji:'🐬', rarity:'epic',     chance:6000,  mult:150000000000},
+      {id:'oceankingii', name:'Ocean King',  emoji:'👑', rarity:'legendary',chance:1990,  mult:260000000000},
+      {id:'abyssgod2',   name:'Abyss God',   emoji:'🌑', rarity:'mythic',   chance:990,   mult:550000000000},
+      {id:'abyss2_secret',name:'???',        emoji:'🐳', rarity:'secret',   chance:10,    mult:7000000000000},
+    ]
+  },
+  // ─── TIER 19 ───
+  {
+    id:'heaven', name:'Heaven Egg', emoji:'😇', cost:2e30,
+    pets:[
+      {id:'angeldog',    name:'Angel Dog',   emoji:'🐶', rarity:'common',   chance:19000, mult:46000000000},
+      {id:'angelcat',    name:'Angel Cat',   emoji:'🐱', rarity:'common',   chance:16000, mult:54000000000},
+      {id:'archangel',   name:'Archangel',   emoji:'👼', rarity:'uncommon', chance:15000, mult:90000000000},
+      {id:'saint',       name:'Saint',       emoji:'✨', rarity:'rare',     chance:10000, mult:145000000000},
+      {id:'paladin',     name:'Paladin',     emoji:'⚔️', rarity:'epic',     chance:5500,  mult:240000000000},
+      {id:'godangel',    name:'God Angel',   emoji:'🌟', rarity:'legendary',chance:1990,  mult:420000000000},
+      {id:'holygod',     name:'Holy God',    emoji:'☁️', rarity:'mythic',   chance:990,   mult:880000000000},
+      {id:'heaven_secret',name:'???',        emoji:'🕊️', rarity:'secret',  chance:10,    mult:11000000000000},
+    ]
+  },
+  {
+    id:'inferno', name:'Inferno Egg', emoji:'😈', cost:2e31,
+    pets:[
+      {id:'hellpup',     name:'Hell Pup',    emoji:'🐶', rarity:'common',   chance:18000, mult:75000000000},
+      {id:'hellcat',     name:'Hell Cat',    emoji:'🐱', rarity:'common',   chance:15000, mult:90000000000},
+      {id:'demon',       name:'Demon',       emoji:'😈', rarity:'uncommon', chance:15000, mult:150000000000},
+      {id:'lucifer',     name:'Lucifer',     emoji:'🔥', rarity:'rare',     chance:10000, mult:240000000000},
+      {id:'archdevil',   name:'Arch Devil',  emoji:'👿', rarity:'epic',     chance:5000,  mult:400000000000},
+      {id:'hellgod',     name:'Hell God',    emoji:'🌋', rarity:'legendary',chance:1990,  mult:700000000000},
+      {id:'devilking',   name:'Devil King',  emoji:'💀', rarity:'mythic',   chance:990,   mult:1500000000000},
+      {id:'inferno_secret',name:'???',       emoji:'☠️', rarity:'secret',   chance:10,    mult:18000000000000},
+    ]
+  },
+  // ─── TIER 20 (true final) ───
+  {
+    id:'alpha', name:'Alpha Egg', emoji:'🅰️', cost:2e32,
+    pets:[
+      {id:'alphapup',    name:'Alpha Pup',   emoji:'🐶', rarity:'epic',     chance:29990, mult:500000000000},
+      {id:'alphacat',    name:'Alpha Cat',   emoji:'🐱', rarity:'epic',     chance:25000, mult:600000000000},
+      {id:'alphadrake',  name:'Alpha Drake', emoji:'🐲', rarity:'legendary',chance:20000, mult:1000000000000},
+      {id:'alphagod',    name:'Alpha God',   emoji:'🅰️', rarity:'mythic',   chance:15000, mult:2200000000000},
+      {id:'alphaomega',  name:'Alpha Omega', emoji:'♾️', rarity:'mythic',   chance:9990,  mult:5000000000000},
+      {id:'alpha_secret',name:'???',         emoji:'🌌', rarity:'secret',   chance:10,    mult:100000000000000},
+      {id:'alpha_ultra', name:'???',         emoji:'💠', rarity:'secret',   chance:10,    mult:500000000000000},
+    ]
+  },
+];
+
+// ── CLICK UPGRADES ──
+// Each upgrade adds a flat BONUS to the multiplier.
+// Formula: perTap = petPower × (1 + sum_of_bonuses)
+// Upgrades are NOT multiplicative with each other — they're additive bonuses.
+// Buying +2 and +3 → bonus = 5 → perTap = petPower × 6
+const CLICK_UPGRADES = [
+  {id:'cu1', name:'Double Tap',    emoji:'✌️',  bonus:1,    cost:200,         desc:'Add +1 bonus (×2 base)', category:'tap'},
+  {id:'cu2', name:'Triple Tap',    emoji:'🤟',  bonus:2,    cost:2000,        desc:'Add +2 bonus (×3 base)', category:'tap'},
+  {id:'cu3', name:'Power Tap',     emoji:'💪',  bonus:4,    cost:15000,       desc:'Add +4 bonus (×5 base)', category:'tap'},
+  {id:'cu4', name:'Hyper Tap',     emoji:'⚡',  bonus:9,    cost:100000,      desc:'Add +9 bonus (×10 base)', category:'tap'},
+  {id:'cu5', name:'Mega Tap',      emoji:'💥',  bonus:24,   cost:1000000,     desc:'Add +24 bonus (×25 base)', category:'tap'},
+  {id:'cu6', name:'Ultra Tap',     emoji:'🌟',  bonus:49,   cost:20000000,    desc:'Add +49 bonus (×50 base)', category:'tap'},
+  {id:'cu7', name:'God Tap',       emoji:'👑',  bonus:99,   cost:500000000,   desc:'Add +99 bonus (×100 base)', category:'tap'},
+  {id:'cu8', name:'Omega Tap',     emoji:'Ω',   bonus:499,  cost:50000000000,  desc:'Add +499 bonus (×500 base)', category:'tap'},
+  {id:'cu9', name:'Nova Tap',      emoji:'💫',  bonus:999,  cost:500000000000, desc:'Add +999 bonus (×1K base)', category:'tap'},
+  {id:'cu10',name:'Galaxy Tap',    emoji:'🌌',  bonus:2499, cost:5e15,         desc:'Add +2499 bonus (×2500 base)', category:'tap'},
+  {id:'cu11',name:'Cosmos Tap',    emoji:'🌠',  bonus:4999, cost:1e18,         desc:'Add +4999 bonus (×5K base)', category:'tap'},
+  {id:'cu12',name:'Dimension Tap', emoji:'🔮',  bonus:9999, cost:5e21,         desc:'Add +9999 bonus (×10K base)', category:'tap'},
+  {id:'cu13',name:'Eternal Tap',   emoji:'♾️',  bonus:24999,cost:1e25,         desc:'Add +24999 bonus (×25K base)', category:'tap'},
+  {id:'cu14',name:'Absolute Tap',  emoji:'👑',  bonus:49999,cost:1e29,         desc:'Add +49999 bonus (×50K base)', category:'tap'},
+  // ─── AUTO CLICKER ───
+  {id:'ac1', name:'Auto Clicker I',  emoji:'🤖', bonus:0, cost:5000,       desc:'Earns 1× your base tap rate per second', category:'auto', rate:1},
+  {id:'ac2', name:'Auto Clicker II', emoji:'⚙️', bonus:0, cost:100000,     desc:'Earns 5× your base tap rate per second', category:'auto', rate:5},
+  {id:'ac3', name:'Auto Clicker III',emoji:'🔩', bonus:0, cost:5000000,    desc:'Earns 20× your base tap rate per second', category:'auto', rate:20},
+  {id:'ac4', name:'Auto Clicker IV', emoji:'🦾', bonus:0, cost:500000000,  desc:'Earns 100× your base tap rate per second', category:'auto', rate:100},
+  // ─── LUCK UPGRADES (stackable, permanent) ───
+  {id:'lu1', name:'Lucky Charm',    emoji:'🍀', bonus:0, cost:1000,        desc:'Permanent 1.5× luck — boosts rare+ chances', category:'luck', luckAdd:0.5},
+  {id:'lu2', name:'Four Leaf',      emoji:'☘️', bonus:0, cost:50000,       desc:'Permanent +0.5× luck (stacks)', category:'luck', luckAdd:0.5},
+  {id:'lu3', name:'Fortune Stone',  emoji:'💎', bonus:0, cost:2000000,     desc:'Permanent +1× luck (stacks)', category:'luck', luckAdd:1.0},
+  {id:'lu4', name:'Destiny Crystal',emoji:'🔮', bonus:0, cost:100000000,   desc:'Permanent +1× luck (stacks)', category:'luck', luckAdd:1.0},
+  {id:'lu5', name:'Fate Bender',    emoji:'⭐', bonus:0, cost:10000000000, desc:'Permanent +2× luck (stacks, max 5× total)', category:'luck', luckAdd:2.0},
+  // ─── EQUIP SLOT UPGRADES ───
+  {id:'es1', name:'4th Slot',     emoji:'🐾', bonus:0, cost:5000,        desc:'Unlock a 4th pet equip slot', category:'slots', slots:4},
+  {id:'es2', name:'5th Slot',     emoji:'🐾', bonus:0, cost:200000,      desc:'Unlock a 5th pet equip slot', category:'slots', slots:5},
+  {id:'es3', name:'6th Slot',     emoji:'🐾', bonus:0, cost:10000000,    desc:'Unlock a 6th pet equip slot', category:'slots', slots:6},
+  {id:'es4', name:'7th Slot',     emoji:'🐾', bonus:0, cost:1000000000,  desc:'Unlock a 7th pet equip slot', category:'slots', slots:7},
+  {id:'es5', name:'8th Slot',     emoji:'🐾', bonus:0, cost:100000000000,desc:'Unlock an 8th pet equip slot', category:'slots', slots:8},
+  {id:'es6', name:'9th Slot',     emoji:'🐾', bonus:0, cost:1e16,        desc:'Unlock a 9th pet equip slot', category:'slots', slots:9},
+  {id:'es7', name:'10th Slot',    emoji:'🐾', bonus:0, cost:1e21,        desc:'Unlock a 10th pet equip slot', category:'slots', slots:10},
+];
+
+const RC  = {common:'#9ca3af',uncommon:'#4ade80',rare:'#60a5fa',epic:'#c084fc',legendary:'#ffd84d',mythic:'#ff9ff3',secret:'#ffd700',shiny:'#ffffff',gold:'#ffb700',rainbow:'#ff6ef7'};
+const RO  = ['rainbow','secret','mythic','shiny','gold','legendary','epic','rare','uncommon','common'];
+const MYTHIC_LABEL = {rainbow:'RAINBOW 🌈',secret:'SECRET ✨',mythic:'MYTHIC 🌟',shiny:'SHINY ✨',gold:'GOLD ⭐',legendary:'LEGENDARY 🌟',epic:'EPIC ⚡',rare:'RARE ⭐',uncommon:'UNCOMMON',common:'COMMON'};
+
+// ════════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════════
+const G = {
+  balance:        0,
+  petPower:       1,   // sum of equipped pet mults
+  tapBonus:       0,   // sum of bought upgrade bonuses
+  totalMult:      1,   // petPower × (1 + tapBonus)
+  equipped:       [null, null, null],
+  storage:        {},
+  totalHatches:   0,
+  boughtUpgrades: new Set(),
+  luckyActive:    false,
+  luckyTimer:     null,
+  activeTab:      'equip',
+  selectedEgg:    EGGS[0],
+  panelOpen:      false,
+  autoRunning:    false,
+  autoTimer:      null,
+  _autoBatch:     [],
+  _pickerSlot:    0,
+  autoClickOn:    false,
+  autoClickTimer: null,
+  luckMult:       1,    // permanent luck from luck upgrades (stacking)
+};
+
+function isShiny(id){ return id.endsWith('_shiny'); }
+function isGold(id){  return id.endsWith('_gold'); }
+function isRainbow(id){ return id.endsWith('_rainbow'); }
+function isCrafted(id){ return isShiny(id)||isGold(id)||isRainbow(id); }
+function getShinyId(id){ return id.replace(/_shiny|_gold|_rainbow/,'')+'_shiny'; }
+function getGoldId(id){  return id.replace(/_shiny|_gold|_rainbow/,'')+'_gold'; }
+function getRainbowId(id){ return id.replace(/_shiny|_gold|_rainbow/,'')+'_rainbow'; }
+
+// ════════════════════════════════════════════════════════════
+// BOOT
+// ════════════════════════════════════════════════════════════
+(function init(){
+  renderEggSelect();
+  renderRPanel();
+  updateHUD();
+  updateWorldEgg();
+  startAutoClicker();
+})();
+
+// ════════════════════════════════════════════════════════════
+// TAP
+// ════════════════════════════════════════════════════════════
+function doTap(e){
+  const gain = G.totalMult;
+  G.balance += gain;
+  spawnFloat(e.clientX, e.clientY, '+'+fmt(gain));
+  spawnRipple(e.clientX, e.clientY);
+  updateHUD();
+  renderEggSelect();
+  if(G.panelOpen) updateEggPanel();
+}
+
+// ════════════════════════════════════════════════════════════
+// MULTIPLIER
+// Formula: totalMult = petPower × (1 + tapBonus)
+// petPower = sum of all equipped pet mult values (min 1)
+// tapBonus = sum of all bought upgrade bonus values
+// ════════════════════════════════════════════════════════════
+function getMaxSlots(){
+  let max=3;
+  G.boughtUpgrades.forEach(uid=>{
+    const u=CLICK_UPGRADES.find(x=>x.id===uid);
+    if(u&&u.category==='slots') max=Math.max(max,u.slots);
+  });
+  return max;
+}
+function recomputeMult(){
+  // Expand equipped array if new slots unlocked
+  const maxS=getMaxSlots();
+  while(G.equipped.length < maxS) G.equipped.push(null);
+  G.petPower = G.equipped.reduce((s,p)=>s+(p?p.mult:0), 0);
+  if(G.petPower < 1) G.petPower = 1;
+  G.tapBonus = 0;
+  G.luckMult = 1;
+  G.boughtUpgrades.forEach(uid=>{
+    const u = CLICK_UPGRADES.find(x=>x.id===uid);
+    if(!u) return;
+    if(u.category==='tap')   G.tapBonus += u.bonus;
+    if(u.category==='luck')  G.luckMult = Math.min(5, G.luckMult + u.luckAdd);
+  });
+  G.totalMult = G.petPower * (1 + G.tapBonus);
+  if(G.totalMult < 1) G.totalMult = 1;
+}
+
+// ════════════════════════════════════════════════════════════
+// HUD
+// ════════════════════════════════════════════════════════════
+function updateHUD(){
+  recomputeMult();
+  document.getElementById('bal-disp').textContent     = fmt(G.balance);
+  document.getElementById('mult-disp').textContent    = fmt(G.totalMult)+'×';
+  document.getElementById('hatches-disp').textContent = G.totalHatches;
+  const acRate=getAutoClickRate();
+  const acTxt = acRate>0 ? '  🤖 +'+fmt(Math.floor(G.totalMult*acRate*0.5))+'/s' : '';
+  const bonusTxt = G.tapBonus > 0 ? '  upg:×'+(1+G.tapBonus) : '';
+  document.getElementById('tap-sub').textContent =
+    '+'+fmt(G.totalMult)+' per tap  (pets:'+fmt(G.petPower)+'×'+bonusTxt+')'+acTxt;
+  const btn = document.getElementById('upg-topbtn');
+  if(btn){
+    const span = btn.querySelector('span.upg-arrow');
+    btn.textContent = '🛒 Upgrades (×'+(1+G.tapBonus)+') ';
+    if(span) btn.appendChild(span);
+  }
+}
+
+function fmt(n){
+  if(!isFinite(n)||isNaN(n)) return '∞';
+  if(n>=1e63)return(n/1e63).toFixed(2)+'Vi';
+  if(n>=1e60)return(n/1e60).toFixed(2)+'Nv';
+  if(n>=1e57)return(n/1e57).toFixed(2)+'Ov';
+  if(n>=1e54)return(n/1e54).toFixed(2)+'Sp';
+  if(n>=1e51)return(n/1e51).toFixed(2)+'Sx';
+  if(n>=1e48)return(n/1e48).toFixed(2)+'Qt';
+  if(n>=1e45)return(n/1e45).toFixed(2)+'Qd';
+  if(n>=1e42)return(n/1e42).toFixed(2)+'Td';
+  if(n>=1e39)return(n/1e39).toFixed(2)+'Du';
+  if(n>=1e36)return(n/1e36).toFixed(2)+'Un';
+  if(n>=1e33)return(n/1e33).toFixed(2)+'Dc';
+  if(n>=1e30)return(n/1e30).toFixed(2)+'No';
+  if(n>=1e27)return(n/1e27).toFixed(2)+'Oc';
+  if(n>=1e24)return(n/1e24).toFixed(2)+'Sp';
+  if(n>=1e21)return(n/1e21).toFixed(2)+'Sx';
+  if(n>=1e18)return(n/1e18).toFixed(2)+'Qt';
+  if(n>=1e15)return(n/1e15).toFixed(2)+'Qa';
+  if(n>=1e12)return(n/1e12).toFixed(2)+'T';
+  if(n>=1e9) return(n/1e9).toFixed(2)+'B';
+  if(n>=1e6) return(n/1e6).toFixed(2)+'M';
+  if(n>=1e3) return(n/1e3).toFixed(1)+'K';
+  return Math.floor(n);
+}
+
+// ════════════════════════════════════════════════════════════
+// EGG SELECT
+// ════════════════════════════════════════════════════════════
+function renderEggSelect(){
+  const list = document.getElementById('egg-select-list');
+  list.innerHTML = '';
+  EGGS.forEach(egg=>{
+    const afford = G.balance>=egg.cost;
+    const active = G.selectedEgg.id===egg.id;
+    const d = document.createElement('div');
+    // Always visible — no lock overlay, just dim if unaffordable
+    d.className='es-egg'+(active?' active':'')+((!afford&&egg.cost>0)?' locked':'');
+    d.style.opacity = (!afford&&egg.cost>0) ? '0.55' : '1';
+    d.innerHTML=`<span class="ee-em">${egg.emoji}</span>
+      <div class="ee-name">${egg.name}</div>
+      <div class="ee-cost ${egg.cost===0?'free':afford?'afford':'cant'}">${egg.cost===0?'Free':fmt(egg.cost)+' 👆'}</div>`;
+    // Always allow clicking to VIEW egg info; only block hatching at purchase time
+    d.onclick=()=>previewOrSelectEgg(egg);
+    list.appendChild(d);
+  });
+}
+
+function previewOrSelectEgg(egg){
+  stopAuto();
+  G.selectedEgg=egg;
+  updateWorldEgg();
+  renderEggSelect();
+  openEggPanel(); // always open panel so user can see pets/chances
+}
+
+function updateWorldEgg(){ document.getElementById('world-egg').textContent=G.selectedEgg.emoji; }
+
+// ════════════════════════════════════════════════════════════
+// EGG INFO PANEL
+// ════════════════════════════════════════════════════════════
+function toggleEggPanel(){ G.panelOpen?closeEggPanel():openEggPanel(); }
+
+function openEggPanel(){
+  G.panelOpen=true;
+  const egg=G.selectedEgg;
+  document.getElementById('eip-em').textContent   = egg.emoji;
+  document.getElementById('eip-name').textContent = egg.name;
+  const ce = document.getElementById('eip-cost');
+  ce.textContent = egg.cost===0?'🆓 Free':'👆 '+fmt(egg.cost)+' per hatch';
+  ce.className   = 'eip-cost'+(egg.cost===0?' free':'');
+  updateEggPanel();
+  document.getElementById('egg-info-panel').classList.add('open');
+}
+
+function closeEggPanel(){
+  G.panelOpen=false; stopAuto();
+  document.getElementById('egg-info-panel').classList.remove('open');
+}
+
+function updateEggPanel(){
+  const egg=G.selectedEgg;
+  const lm = G.luckMult * (G.luckyActive ? 2 : 1);
+  // build weighted pool same as rollPet for display
+  const pool=egg.pets.map(p=>{
+    let w=p.chance;
+    if(lm>1){
+      if(p.rarity==='uncommon') w *= 1+(lm-1)*0.5;
+      if(p.rarity==='rare')     w *= lm;
+      if(p.rarity==='epic')     w *= lm;
+      if(p.rarity==='legendary')w *= lm*1.2;
+      if(p.rarity==='mythic')   w *= lm*1.5;
+      if(p.rarity==='secret')   w *= lm*2;
+    }
+    return {...p,w};
+  });
+  const total=pool.reduce((s,p)=>s+p.w,0);
+  const canAfford=G.balance>=egg.cost;
+  const luckLabel = lm>1 ? `<span style="color:var(--green);font-size:8px;font-weight:800;"> (luck: ${lm.toFixed(1)}×)</span>` : '';
+  document.getElementById('eip-pets').innerHTML=pool.map(p=>{
+    const pct=(p.w/total)*100;
+    const pctStr = pct<0.001 ? pct.toFixed(4)+'%' : pct<0.1 ? pct.toFixed(3)+'%' : pct<1 ? pct.toFixed(2)+'%' : pct.toFixed(1)+'%';
+    const barW=Math.max(1,Math.round((p.w/total)*100));
+    const color=RC[p.rarity]||RC.common;
+    const isScrt = p.rarity==='secret';
+    return `<div class="eip-pet" ${isScrt?'style="border-color:rgba(255,215,0,.4);background:rgba(255,215,0,.06)"':''}>
+      <div class="ipp-em">${p.emoji}</div>
+      <div class="ipp-name" style="color:${color}">${isScrt?'❓ ???':p.name}</div>
+      <div class="ipp-bar-wrap"><div class="ipp-bar" style="width:${barW}%;background:${color}"></div></div>
+      <div class="ipp-pct" style="color:${color}">${pctStr}</div>
+      <div class="ipp-mult">${isScrt?'???':fmt(p.mult)+'×'}</div>
+    </div>`;
+  }).join('')+(lm>1?`<div style="grid-column:1/-1;font-size:8px;color:var(--green);font-weight:800;text-align:center;padding:3px 0">🍀 Luck active: ${lm.toFixed(1)}× — rare+ odds boosted</div>`:'');
+  document.getElementById('btn-h1').disabled=!canAfford;
+  document.getElementById('btn-h3').disabled=G.balance<egg.cost*3;
+  document.getElementById('eip-cost-hint').textContent=
+    egg.cost===0?'Free to hatch!'
+    : canAfford ? 'Balance: '+fmt(G.balance)+'  ·  ×3: '+fmt(egg.cost*3)
+    : '🔒 Need '+fmt(egg.cost)+' clicks to hatch (you have '+fmt(G.balance)+')';
+}
+
+// ════════════════════════════════════════════════════════════
+// HATCHING
+// ════════════════════════════════════════════════════════════
+function hatch1(){
+  const egg=G.selectedEgg;
+  if(G.balance<egg.cost){notify('Not enough clicks!');return;}
+  G.balance-=egg.cost;
+  const pet=doHatch(egg);
+  updateHUD(); renderEggSelect(); renderRPanel();
+  if(G.panelOpen) updateEggPanel();
+  showReveal(pet);
+}
+
+function hatch3(){
+  const egg=G.selectedEgg;
+  const c3=egg.cost*3;
+  if(G.balance<c3){notify('Need '+fmt(c3)+' for ×3!');return;}
+  G.balance-=c3;
+  const pets=[doHatch(egg),doHatch(egg),doHatch(egg)];
+  updateHUD(); renderEggSelect(); renderRPanel();
+  if(G.panelOpen) updateEggPanel();
+  showMultiReveal(pets,'× 3 Results!');
+}
+
+function toggleAuto(){ G.autoRunning?stopAuto():startAuto(); }
+
+function startAuto(){
+  const egg=G.selectedEgg;
+  if(G.balance<egg.cost){notify('Not enough clicks!');return;}
+  G.autoRunning=true; G._autoBatch=[];
+  const btn=document.getElementById('btn-auto');
+  btn.textContent='⏹ Stop'; btn.classList.add('running');
+  G.autoTimer=setInterval(()=>{
+    if(G.balance<egg.cost){
+      const b=[...G._autoBatch]; G._autoBatch=[];
+      stopAuto();
+      if(b.length){renderRPanel();updateHUD();showMultiReveal(b,'Auto ('+b.length+'×)');}
+      notify('Auto stopped — out of clicks!'); return;
+    }
+    G.balance-=egg.cost;
+    G._autoBatch.push(doHatch(egg));
+    updateHUD(); renderEggSelect();
+    if(G.panelOpen) updateEggPanel();
+  },300);
+}
+
+function stopAuto(){
+  if(!G.autoRunning) return;
+  G.autoRunning=false; clearInterval(G.autoTimer);
+  const btn=document.getElementById('btn-auto');
+  if(btn){btn.textContent='▶ Auto';btn.classList.remove('running');}
+  if(G._autoBatch&&G._autoBatch.length>0){
+    const b=[...G._autoBatch]; G._autoBatch=[];
+    renderRPanel(); updateHUD();
+    showMultiReveal(b,'Auto ('+b.length+'×)');
+  }
+}
+
+function doHatch(egg){
+  const pet=rollPet(egg);
+  addToStorage(pet); G.totalHatches++;
+  popWorldEgg();
+  if(!G.luckyActive&&Math.random()<0.04) activateLucky();
+  return pet;
+}
+
+function popWorldEgg(){
+  const el=document.getElementById('world-egg');
+  el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop');
+  el.addEventListener('animationend',()=>el.classList.remove('pop'),{once:true});
+}
+
+function rollPet(egg){
+  const lm = G.luckMult * (G.luckyActive ? 2 : 1); // permanent luck × lucky egg bonus
+  const pool=egg.pets.map(p=>{
+    let w=p.chance;
+    if(lm > 1){
+      if(p.rarity==='uncommon') w *= 1 + (lm-1)*0.5;
+      if(p.rarity==='rare')     w *= lm;
+      if(p.rarity==='epic')     w *= lm;
+      if(p.rarity==='legendary')w *= lm * 1.2;
+      if(p.rarity==='mythic')   w *= lm * 1.5;
+      if(p.rarity==='secret')   w *= lm * 2;
+    }
+    return {...p,w};
+  });
+  const tot=pool.reduce((s,p)=>s+p.w,0);
+  let r=Math.random()*tot;
+  for(const p of pool){r-=p.w;if(r<=0)return p;}
+  return pool[pool.length-1];
+}
+
+function addToStorage(pet){
+  if(!G.storage[pet.id]) G.storage[pet.id]={pet:{...pet},count:0};
+  G.storage[pet.id].count++;
+}
+
+// ════════════════════════════════════════════════════════════
+// UPGRADE MODAL
+// ════════════════════════════════════════════════════════════
+function openUpgModal(){
+  renderUpgGrid();
+  document.getElementById('upg-modal').classList.add('open');
+}
+function closeUpgModal(){ document.getElementById('upg-modal').classList.remove('open'); }
+function closeUpgModalBg(e){ if(e.target===document.getElementById('upg-modal')) closeUpgModal(); }
+
+function renderUpgGrid(){
+  const grid=document.getElementById('upg-grid');
+  grid.innerHTML='';
+
+  // ── TAP MULTIPLIERS section ──
+  const tapHdr=document.createElement('div');
+  tapHdr.style.cssText='grid-column:1/-1;font-family:Baloo 2,cursive;font-size:11px;font-weight:900;color:var(--purple);padding:4px 0 6px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:4px;';
+  tapHdr.textContent='⚡ TAP MULTIPLIERS';
+  grid.appendChild(tapHdr);
+
+  CLICK_UPGRADES.filter(u=>u.category==='tap').forEach(u=>{
+    const bought=G.boughtUpgrades.has(u.id);
+    const afford=G.balance>=u.cost;
+    const d=document.createElement('div');
+    d.className='upg-item'+(bought?' bought':'');
+    d.innerHTML=`<div class="ui-top"><div class="ui-em">${u.emoji}</div>
+      <div><div class="ui-name">${u.name}</div>
+      <div class="ui-effect">+${u.bonus} bonus → ×${1+u.bonus} base</div></div></div>
+      <div class="ui-desc">${u.desc}</div>
+      <button class="ui-btn ${bought?'':afford?'can':'cant'}">${bought?'✅ Owned':afford?'👆 '+fmt(u.cost):'🔒 '+fmt(u.cost)}</button>`;
+    if(!bought&&afford) d.onclick=()=>buyUpgrade(u.id);
+    grid.appendChild(d);
+  });
+
+  // ── AUTO CLICKER section ──
+  const acHdr=document.createElement('div');
+  acHdr.style.cssText='grid-column:1/-1;font-family:Baloo 2,cursive;font-size:11px;font-weight:900;color:var(--green);padding:10px 0 6px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:4px;margin-top:8px;';
+  acHdr.textContent='🤖 AUTO CLICKER — earns clicks passively (based on your current tap power)';
+  grid.appendChild(acHdr);
+
+  CLICK_UPGRADES.filter(u=>u.category==='auto').forEach(u=>{
+    const bought=G.boughtUpgrades.has(u.id);
+    const afford=G.balance>=u.cost;
+    const d=document.createElement('div');
+    d.className='upg-item'+(bought?' bought':'');
+    d.innerHTML=`<div class="ui-top"><div class="ui-em">${u.emoji}</div>
+      <div><div class="ui-name">${u.name}</div>
+      <div class="ui-effect" style="color:var(--green)">${u.rate}× tap/sec passive</div></div></div>
+      <div class="ui-desc">${u.desc}</div>
+      <button class="ui-btn ${bought?'':afford?'can':'cant'}">${bought?'✅ Owned':afford?'👆 '+fmt(u.cost):'🔒 '+fmt(u.cost)}</button>`;
+    if(!bought&&afford) d.onclick=()=>buyUpgrade(u.id);
+    grid.appendChild(d);
+  });
+
+  // formula preview
+  const preview=document.createElement('div');
+  preview.style.cssText='grid-column:1/-1;font-size:10px;color:var(--muted);text-align:center;padding:8px 0 2px;font-family:Baloo 2,cursive;font-weight:800;';
+  const acRate=getAutoClickRate();
+  preview.textContent='Tap: '+fmt(G.petPower)+'× × (1+'+G.tapBonus+') = '+fmt(G.totalMult)+'×/tap'+(acRate>0?'  |  Auto: +'+fmt(acRate*G.totalMult)+'/sec':'');
+  grid.appendChild(preview);
+
+  // ── LUCK section ──
+  const lkHdr=document.createElement('div');
+  lkHdr.style.cssText='grid-column:1/-1;font-family:Baloo 2,cursive;font-size:11px;font-weight:900;color:#4ade80;padding:10px 0 6px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:4px;margin-top:8px;';
+  lkHdr.textContent='🍀 LUCK UPGRADES — permanent, stackable (max 5× total luck)';
+  grid.appendChild(lkHdr);
+
+  CLICK_UPGRADES.filter(u=>u.category==='luck').forEach(u=>{
+    const bought=G.boughtUpgrades.has(u.id);
+    const afford=G.balance>=u.cost;
+    const d=document.createElement('div');
+    d.className='upg-item'+(bought?' bought':'');
+    d.innerHTML=`<div class="ui-top"><div class="ui-em">${u.emoji}</div>
+      <div><div class="ui-name">${u.name}</div>
+      <div class="ui-effect" style="color:#4ade80">+${u.luckAdd}× luck (stacks)</div></div></div>
+      <div class="ui-desc">${u.desc}</div>
+      <button class="ui-btn ${bought?'':afford?'can':'cant'}">${bought?'✅ Owned':afford?'👆 '+fmt(u.cost):'🔒 '+fmt(u.cost)}</button>`;
+    if(!bought&&afford) d.onclick=()=>buyUpgrade(u.id);
+    grid.appendChild(d);
+  });
+
+  const lkPreview=document.createElement('div');
+  lkPreview.style.cssText='grid-column:1/-1;font-size:10px;color:var(--muted);text-align:center;padding:6px 0 2px;font-family:Baloo 2,cursive;font-weight:800;';
+  lkPreview.textContent='Current luck: '+G.luckMult.toFixed(1)+'× (max 5×) — boosts rare+ hatch odds';
+  grid.appendChild(lkPreview);
+
+  // ── EQUIP SLOTS section ──
+  const slHdr=document.createElement('div');
+  slHdr.style.cssText='grid-column:1/-1;font-family:Baloo 2,cursive;font-size:11px;font-weight:900;color:#f59e0b;padding:10px 0 6px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:4px;margin-top:8px;';
+  slHdr.textContent='🐾 EQUIP SLOTS — unlock more pet slots (currently '+getMaxSlots()+'/10)';
+  grid.appendChild(slHdr);
+  CLICK_UPGRADES.filter(u=>u.category==='slots').forEach(u=>{
+    const bought=G.boughtUpgrades.has(u.id);
+    const afford=G.balance>=u.cost;
+    const alreadyUnlocked=getMaxSlots()>=u.slots;
+    const d=document.createElement('div');
+    d.className='upg-item'+(alreadyUnlocked?' bought':'');
+    d.innerHTML=`<div class="ui-top"><div class="ui-em">${u.emoji}</div>
+      <div><div class="ui-name">${u.name}</div>
+      <div class="ui-effect" style="color:#f59e0b">Unlock slot ${u.slots}</div></div></div>
+      <div class="ui-desc">${u.desc}</div>
+      <button class="ui-btn ${alreadyUnlocked?'':afford?'can':'cant'}">${alreadyUnlocked?'✅ Unlocked':afford?'👆 '+fmt(u.cost):'🔒 '+fmt(u.cost)}</button>`;
+    if(!alreadyUnlocked&&afford) d.onclick=()=>buyUpgrade(u.id);
+    grid.appendChild(d);
+  });
+}
+
+function getAutoClickRate(){
+  // Returns the rate multiplier (e.g. 5 means 5× per second)
+  let rate=0;
+  // Only the best auto clicker applies (they don't stack — each replaces)
+  const acUpgrades=CLICK_UPGRADES.filter(u=>u.category==='auto'&&G.boughtUpgrades.has(u.id));
+  if(acUpgrades.length) rate=Math.max(...acUpgrades.map(u=>u.rate));
+  return rate;
+}
+
+function startAutoClicker(){
+  if(G.autoClickTimer) clearInterval(G.autoClickTimer);
+  G.autoClickTimer=setInterval(()=>{
+    const rate=getAutoClickRate();
+    if(rate===0) return;
+    // Earn clicks at rate × totalMult, but slower than tapping (rate is a fraction)
+    // rate=1 means ~1 tap equivalent per second; rate=5 means ~5 taps/sec
+    // To avoid being too fast we cap at 2 taps/sec equivalent × rate factor
+    const gain=Math.max(1, Math.floor(G.totalMult * rate * 0.5));
+    G.balance+=gain;
+    updateHUD();
+    renderEggSelect();
+    if(G.panelOpen) updateEggPanel();
+  }, 1000);
+}
+
+function buyUpgrade(uid){
+  const u=CLICK_UPGRADES.find(x=>x.id===uid);
+  if(!u||G.boughtUpgrades.has(uid)) return;
+  if(G.balance<u.cost){notify('Need '+fmt(u.cost)+'!');return;}
+  G.balance-=u.cost;
+  G.boughtUpgrades.add(uid);
+  recomputeMult(); updateHUD(); renderUpgGrid(); renderRPanel();
+  // Restart auto clicker with new rate
+  startAutoClicker();
+  if(u.category==='tap') notify('✅ '+u.name+' — now ×(1+'+G.tapBonus+') bonus = '+fmt(G.totalMult)+'× total!');
+  else notify('✅ '+u.name+' active! Earning passively at '+u.rate+'× tap rate/sec');
+}
+
+// ════════════════════════════════════════════════════════════
+// RIGHT PANEL
+// ════════════════════════════════════════════════════════════
+function rTab(tab){
+  G.activeTab=tab;
+  ['equip','bag','craft','stats'].forEach(t=>document.getElementById('tab-'+t).classList.toggle('active',t===tab));
+  renderRPanel();
+}
+function renderRPanel(){
+  const b=document.getElementById('rp-body');
+  if(G.activeTab==='equip')      renderEquip(b);
+  else if(G.activeTab==='bag')   renderBag(b);
+  else if(G.activeTab==='craft') renderCraft(b);
+  else                           renderStats(b);
+}
+
+// EQUIP BEST — fills all slots with the highest-mult pets you own
+function equipBest(){
+  // Collect all owned pets sorted by mult desc
+  const all=[];
+  Object.values(G.storage).forEach(({pet,count})=>{
+    for(let i=0;i<count;i++) all.push({...pet});
+  });
+  all.sort((a,b)=>b.mult-a.mult);
+  // Fill slots greedily up to max
+  const maxS=getMaxSlots();
+  const newEquipped=Array(maxS).fill(null);
+  const used={}; // petId -> count used
+  for(const p of all){
+    const slot=newEquipped.indexOf(null);
+    if(slot===-1) break;
+    used[p.id]=(used[p.id]||0)+1;
+    const owned=(G.storage[p.id]?.count||0);
+    if(used[p.id]<=owned){ newEquipped[slot]=p; }
+  }
+  G.equipped=newEquipped;
+  recomputeMult(); updateHUD(); renderRPanel();
+  const names=newEquipped.filter(Boolean).map(p=>p.name).join(', ');
+  notify('✅ Equipped best: '+names+' ('+fmt(G.totalMult)+'× total)');
+}
+
+// EQUIP
+function renderEquip(body){
+  recomputeMult();
+  const slots=G.equipped.map((p,i)=>`
+    <div class="eslot ${p?'on':''} ${p&&isShiny(p.id)?'shiny-slot':''}" onclick="onSlotClick(${i})">
+      ${p?`<span class="sx" onclick="event.stopPropagation();unequip(${i})">✕</span>
+           <div class="se">${p.emoji}</div>
+           <div class="sm" style="color:${RC[p.rarity]||RC.common}">${fmt(p.mult)}×</div>`
+        :`<div style="font-size:7px;color:var(--muted);text-align:center">+<br>Slot ${i+1}</div>`}
+    </div>`).join('');
+  body.innerHTML=`
+    <div class="eq-hint">Tap empty slot → pick pet · ✕ to remove</div>
+    <div class="slots-row">${slots}</div>
+    <button onclick="equipBest()" style="width:100%;padding:7px;border:none;border-radius:8px;background:linear-gradient(135deg,#059669,#10b981);color:#fff;font-family:'Baloo 2',cursive;font-weight:900;font-size:11px;cursor:pointer;margin-bottom:7px;box-shadow:0 2px 0 #065f46;">⭐ Equip Best</button>
+    <div class="eq-total">${G.equipped.filter(Boolean).length===0
+      ?'No pets equipped'
+      :'Pets: '+fmt(G.petPower)+'×  ·  Total: '+fmt(G.totalMult)+'×'}</div>
+    <div style="font-size:8px;color:var(--muted);line-height:1.5;padding:2px 0;">
+      Total = (sum of pet mults) × (1 + tap bonus)<br>
+      Equip duplicates across slots!
+    </div>`;
+}
+
+function onSlotClick(i){ if(!G.equipped[i]) openSlotPicker(i); }
+function unequip(i){
+  if(!G.equipped[i]) return;
+  const n=G.equipped[i].name; G.equipped[i]=null;
+  recomputeMult(); updateHUD(); renderRPanel();
+  notify('🔓 '+n+' unequipped');
+}
+
+// SLOT PICKER
+function openSlotPicker(slotIndex){
+  const entries=Object.values(G.storage);
+  if(!entries.length){notify('No pets yet!');return;}
+  G._pickerSlot=slotIndex;
+  const grid=document.getElementById('sp-grid'); grid.innerHTML='';
+  let added=0;
+  RO.forEach(rar=>{
+    entries.filter(e=>e.pet.rarity===rar).forEach(({pet,count})=>{
+      const eqN=G.equipped.filter(e=>e&&e.id===pet.id).length;
+      if(eqN>=count) return;
+      const d=document.createElement('div'); d.className='sp-slot';
+      d.innerHTML=`<div class="ss-em">${pet.emoji}</div><div class="ss-name">${pet.name}</div><div class="ss-mult" style="color:${RC[pet.rarity]||RC.common}">${fmt(pet.mult)}×</div>`;
+      d.onclick=()=>pickPetForSlot(pet.id); grid.appendChild(d); added++;
+    });
+  });
+  if(!added) grid.innerHTML='<div style="grid-column:1/-1;color:var(--muted);font-size:10px;text-align:center;padding:10px">All copies equipped!</div>';
+  document.getElementById('sp-title').textContent='Equip into Slot '+(slotIndex+1);
+  document.getElementById('slot-picker').classList.add('open');
+}
+function pickPetForSlot(petId){
+  const e=G.storage[petId]; if(!e) return;
+  G.equipped[G._pickerSlot]={...e.pet};
+  recomputeMult(); updateHUD(); renderRPanel(); closeSlotPicker();
+  notify('✅ '+e.pet.name+' → slot '+(G._pickerSlot+1)+'  (total: '+fmt(G.totalMult)+'×)');
+}
+function closeSlotPicker(){ document.getElementById('slot-picker').classList.remove('open'); }
+
+// BAG
+function renderBag(body){
+  const entries=Object.values(G.storage);
+  if(!entries.length){body.innerHTML='<div class="sg"><div class="empty">No pets yet 🥚</div></div>';return;}
+  let html='<div class="sg">';
+  RO.forEach(rar=>{
+    const group=entries.filter(e=>e.pet.rarity===rar); if(!group.length) return;
+    html+=`<div class="rdiv" style="color:${RC[rar]||RC.common}">${rar.toUpperCase()}</div>`;
+    group.forEach(({pet,count})=>{
+      const eqN=G.equipped.filter(e=>e&&e.id===pet.id).length;
+      html+=`<div class="pc ${eqN>0?'on':''} ${isShiny(pet.id)?'is-shiny':''}" onclick="quickEquip('${pet.id}')">
+        ${eqN>0?`<div class="pon">${eqN>1?eqN:'ON'}</div>`:''}
+        ${count>1?`<div class="pcount">×${count}</div>`:''}
+        <div class="pe">${pet.emoji}</div>
+        <div class="pn">${pet.name}</div>
+        <div class="pm" style="color:${RC[pet.rarity]||RC.common}">${fmt(pet.mult)}×</div>
+      </div>`;
+    });
+  });
+  html+='</div>'; body.innerHTML=html;
+}
+function quickEquip(petId){
+  const e=G.storage[petId]; if(!e) return;
+  const eqN=G.equipped.filter(x=>x&&x.id===petId).length;
+  if(eqN>=e.count){notify('All copies already equipped!');return;}
+  const free=G.equipped.indexOf(null);
+  if(free!==-1){ G.equipped[free]={...e.pet}; recomputeMult(); updateHUD(); renderRPanel(); notify('✅ '+e.pet.name+' → slot '+(free+1)+'  ('+fmt(G.totalMult)+'×)'); }
+  else openReplacePicker(petId);
+}
+function openReplacePicker(petId){
+  const e=G.storage[petId]; if(!e) return;
+  const grid=document.getElementById('sp-grid'); grid.innerHTML='';
+  document.getElementById('sp-title').textContent='Replace which slot?';
+  G.equipped.forEach((p,i)=>{
+    const d=document.createElement('div'); d.className='sp-slot'+(p?' has':'');
+    d.innerHTML=`<div class="ss-em">${p?p.emoji:'❓'}</div><div class="ss-name">${p?p.name:'Empty'}</div><div class="ss-mult" style="color:${p?RC[p.rarity]||RC.common:'var(--muted)'}">${p?fmt(p.mult)+'×':''}</div>`;
+    d.onclick=()=>{ G.equipped[i]={...e.pet}; recomputeMult(); updateHUD(); renderRPanel(); closeSlotPicker(); notify('Replaced slot '+(i+1)); };
+    grid.appendChild(d);
+  });
+  document.getElementById('slot-picker').classList.add('open');
+}
+
+// CRAFT
+function renderCraft(body){
+  const all=Object.values(G.storage);
+  // base pets (not crafted)
+  const base=all.filter(e=>!isCrafted(e.pet.id));
+  // shiny pets
+  const shinies=all.filter(e=>isShiny(e.pet.id)&&!isGold(e.pet.id)&&!isRainbow(e.pet.id));
+  // gold pets
+  const golds=all.filter(e=>isGold(e.pet.id));
+
+  if(!base.length&&!shinies.length&&!golds.length){
+    body.innerHTML='<div style="color:var(--muted);font-size:11px;text-align:center;padding:20px">Hatch pets first!</div>';
+    return;
+  }
+
+  let html=`<div style="font-size:8px;color:var(--muted);margin-bottom:8px;font-weight:700;line-height:1.6;">
+    ✨ 5× base → Shiny (2× stats)<br>
+    ⭐ 5× shiny → Gold (5× base stats)<br>
+    🌈 5× gold → Rainbow (10× base stats)
+  </div>`;
+
+  // ─ SECTION: base → shiny ─
+  if(base.length){
+    html+=`<div style="font-size:9px;color:var(--shiny);font-weight:900;margin:6px 0 4px;letter-spacing:1px;">✨ CRAFT SHINY</div>`;
+    base.forEach(({pet,count})=>{
+      const can=count>=5;
+      html+=craftRow(pet, count, 5, '✨'+pet.emoji, '✨ Shiny '+pet.name, pet.mult*2, 'shiny', can, `craftShiny('${pet.id}')`);
+    });
+  }
+
+  // ─ SECTION: shiny → gold ─
+  if(shinies.length){
+    html+=`<div style="font-size:9px;color:#ffb700;font-weight:900;margin:10px 0 4px;letter-spacing:1px;">⭐ CRAFT GOLD</div>`;
+    shinies.forEach(({pet,count})=>{
+      const can=count>=5;
+      const baseMult = G.storage[baseId(pet.id)]?.pet.mult || (pet.mult/2);
+      html+=craftRow(pet, count, 5, '⭐'+pet.emoji, '⭐ Gold '+pet.name.replace('✨',''), baseMult*5, 'gold', can, `craftGold('${pet.id}')`);
+    });
+  }
+
+  // ─ SECTION: gold → rainbow ─
+  if(golds.length){
+    html+=`<div style="font-size:9px;color:#ff6ef7;font-weight:900;margin:10px 0 4px;letter-spacing:1px;">🌈 CRAFT RAINBOW</div>`;
+    golds.forEach(({pet,count})=>{
+      const can=count>=5;
+      const baseMult = G.storage[baseId(pet.id)]?.pet.mult || (pet.mult/5);
+      html+=craftRow(pet, count, 5, '🌈'+pet.emoji, '🌈 Rainbow '+pet.name.replace('⭐',''), baseMult*10, 'rainbow', can, `craftRainbow('${pet.id}')`);
+    });
+  }
+
+  body.innerHTML=html;
+}
+
+function baseId(id){ return id.replace(/_shiny|_gold|_rainbow/g,''); }
+
+function craftRow(pet, count, need, resultEmoji, resultName, resultMult, resultRarity, can, callFn){
+  const color=RC[resultRarity]||RC.common;
+  return `<div class="craft-card">
+    <div class="craft-top">
+      <div class="craft-em">${pet.emoji}</div>
+      <div>
+        <div class="cname">${pet.name} <span style="color:${RC[pet.rarity]||RC.common}">×${count}</span></div>
+        <div class="cdesc" style="color:${color}">→ ${resultEmoji} ${resultName} (${fmt(resultMult)}×)</div>
+      </div>
+    </div>
+    <button class="craft-btn ${can?'can':'cant'}" ${can?`onclick="${callFn}"`:''}>
+      ${can?`${resultEmoji} Craft (5×)`:'Need '+(need-count)+' more'}
+    </button>
+  </div>`;
+}
+
+function craftShiny(petId){
+  const e=G.storage[petId]; if(!e||e.count<5){notify('Need 5!');return;}
+  e.count-=5; if(e.count<=0) delete G.storage[petId];
+  const sid=petId+'_shiny';
+  const sp={id:sid,name:'✨'+e.pet.name,emoji:'✨'+e.pet.emoji,rarity:'shiny',chance:0,mult:e.pet.mult*2};
+  if(!G.storage[sid]) G.storage[sid]={pet:sp,count:0};
+  G.storage[sid].count++;
+  renderRPanel(); spawnParticles(RC.shiny);
+  notify('✨ Crafted Shiny '+e.pet.name+'! ('+fmt(sp.mult)+'×)');
+}
+
+function craftGold(shinyId){
+  const e=G.storage[shinyId]; if(!e||e.count<5){notify('Need 5 shinies!');return;}
+  e.count-=5; if(e.count<=0) delete G.storage[shinyId];
+  const bid=baseId(shinyId);
+  const baseMult=G.storage[bid]?.pet.mult || (e.pet.mult/2);
+  const gid=bid+'_gold';
+  const gp={id:gid,name:'⭐'+e.pet.name.replace('✨',''),emoji:'⭐'+e.pet.emoji.replace('✨',''),rarity:'gold',chance:0,mult:baseMult*5};
+  if(!G.storage[gid]) G.storage[gid]={pet:gp,count:0};
+  G.storage[gid].count++;
+  renderRPanel(); spawnParticles(RC.gold);
+  notify('⭐ Crafted Gold '+gp.name+'! ('+fmt(gp.mult)+'×)');
+}
+
+function craftRainbow(goldId){
+  const e=G.storage[goldId]; if(!e||e.count<5){notify('Need 5 gold pets!');return;}
+  e.count-=5; if(e.count<=0) delete G.storage[goldId];
+  const bid=baseId(goldId);
+  const baseMult=G.storage[bid]?.pet.mult || (e.pet.mult/5);
+  const rid=bid+'_rainbow';
+  const rp={id:rid,name:'🌈'+e.pet.name.replace('⭐',''),emoji:'🌈'+e.pet.emoji.replace('⭐',''),rarity:'rainbow',chance:0,mult:baseMult*10};
+  if(!G.storage[rid]) G.storage[rid]={pet:rp,count:0};
+  G.storage[rid].count++;
+  renderRPanel(); spawnParticles(RC.rainbow);
+  notify('🌈 Crafted RAINBOW '+rp.name+'! ('+fmt(rp.mult)+'×)');
+}
+
+// STATS
+function renderStats(body){
+  recomputeMult();
+  const tp=Object.values(G.storage).reduce((s,e)=>s+e.count,0);
+  const u=Object.keys(G.storage).length;
+  const au=new Set(EGGS.flatMap(e=>e.pets.map(p=>p.id))).size;
+  const rows=[
+    ['Balance',fmt(G.balance)],['Pet Power',fmt(G.petPower)+'×'],
+    ['Tap Bonus','×'+(1+G.tapBonus)],['Total Mult',fmt(G.totalMult)+'×'],
+    ['Luck',G.luckMult.toFixed(1)+'× (max 5×)'],
+    ['Hatches',G.totalHatches],['Unique Pets',u+'/'+au],
+    ['Total Pets',tp],['Shinies',Object.keys(G.storage).filter(isShiny).length],
+    ['Upgrades',G.boughtUpgrades.size+'/'+CLICK_UPGRADES.length],
+    ['Lucky',G.luckyActive?'✅':'❌'],['Eggs',EGGS.length],
+  ];
+  body.innerHTML=rows.map(([l,v])=>`<div class="strow"><span class="sl">${l}</span><span class="sv">${v}</span></div>`).join('');
+}
+
+// ════════════════════════════════════════════════════════════
+// REVEALS
+// ════════════════════════════════════════════════════════════
+function showReveal(pet){
+  const isNew=G.storage[pet.id]?.count===1;
+  document.getElementById('rv-rar').textContent=MYTHIC_LABEL[pet.rarity]||pet.rarity.toUpperCase();
+  document.getElementById('rv-rar').style.color=RC[pet.rarity]||RC.common;
+  document.getElementById('rv-em').textContent=pet.emoji;
+  document.getElementById('rv-name').textContent=pet.name;
+  document.getElementById('rv-mult').textContent=fmt(pet.mult)+'× mult when equipped';
+  document.getElementById('rv-new').style.display=isNew?'block':'none';
+  document.getElementById('reveal').classList.add('open');
+  spawnParticles(RC[pet.rarity]||RC.common);
+}
+function closeReveal(){ document.getElementById('reveal').classList.remove('open'); }
+
+function showMultiReveal(pets,title){
+  document.getElementById('mr-title').textContent=title;
+  document.getElementById('mr-grid').innerHTML=pets.map((p,i)=>`
+    <div class="mr-card" style="--i:${i};border-color:${(RC[p.rarity]||RC.common)+'44'}">
+      <div class="mc-em">${p.emoji}</div>
+      <div class="mc-name">${p.name}</div>
+      <div class="mc-rar" style="color:${RC[p.rarity]||RC.common}">${p.rarity}</div>
+    </div>`).join('');
+  document.getElementById('multi-reveal').classList.add('open');
+  const best=pets.reduce((a,b)=>b.mult>a.mult?b:a,pets[0]);
+  spawnParticles(RC[best.rarity]||RC.common);
+}
+function closeMultiReveal(){ document.getElementById('multi-reveal').classList.remove('open'); }
+
+// ════════════════════════════════════════════════════════════
+// LUCKY EGG
+// ════════════════════════════════════════════════════════════
+function activateLucky(){
+  G.luckyActive=true;
+  document.getElementById('lucky-banner').style.display='block';
+  clearTimeout(G.luckyTimer);
+  G.luckyTimer=setTimeout(()=>{ G.luckyActive=false; document.getElementById('lucky-banner').style.display='none'; notify('Lucky Egg ended!'); },30000);
+  notify('⭐ Lucky Egg! Boosted rates for 30s!');
+}
+
+// ════════════════════════════════════════════════════════════
+// VFX
+// ════════════════════════════════════════════════════════════
+function spawnFloat(x,y,txt){
+  const f=document.createElement('div');f.className='floatN';f.textContent=txt;
+  f.style.left=x+'px';f.style.top=y+'px';document.body.appendChild(f);
+  setTimeout(()=>f.remove(),600);
+}
+function spawnRipple(x,y){
+  const r=document.createElement('div');r.className='ripple';
+  r.style.left=x+'px';r.style.top=y+'px';document.body.appendChild(r);
+  setTimeout(()=>r.remove(),420);
+}
+function spawnParticles(color){
+  const cx=window.innerWidth/2,cy=window.innerHeight/2;
+  for(let i=0;i<22;i++){
+    const p=document.createElement('div');p.className='part';
+    const sz=5+Math.random()*9,a=Math.random()*Math.PI*2,d=70+Math.random()*150;
+    p.style.cssText=`width:${sz}px;height:${sz}px;background:${color};left:${cx}px;top:${cy}px;--tx:${Math.cos(a)*d}px;--ty:${Math.sin(a)*d}px`;
+    document.body.appendChild(p);setTimeout(()=>p.remove(),700);
+  }
+}
+let _nt;
+function notify(msg){
+  const el=document.getElementById('notify');el.textContent=msg;el.classList.add('show');
+  clearTimeout(_nt);_nt=setTimeout(()=>el.classList.remove('show'),2400);
+}
+</script>
+
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+// ════════════════════════════════════════════════════════════
+// SUPABASE AUTH + SAVE/LOAD
+// Project: yhrhswyuiqpifktgymkw
+// ════════════════════════════════════════════════════════════
+const SUPABASE_URL = 'https://yhrhswyuiqpifktgymkw.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlocmhzd3l1aXFwaWZrdGd5bWt3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQyNDk3NTksImV4cCI6MjA4OTgyNTc1OX0.-d4wVn1Hum4V8FESKCV3ZInlCqYoFUtxU4wM4gppISE';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let _currentUser = null;
+
+// Check session on load
+(async function checkSession(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(session?.user){
+    _currentUser = session.user;
+    updateAuthUI();
+    // Auto-load save on login
+    await loadGame(true);
+  }
+})();
+
+// Auth modal open/close
+function openAuthModal(){
+  document.getElementById('auth-modal').classList.add('open');
+  updateAuthUI();
+  setTimeout(adminPopulateSecrets, 50);
+}
+function closeAuthModal(){ document.getElementById('auth-modal').classList.remove('open'); }
+function closeAuthModalBg(e){ if(e.target===document.getElementById('auth-modal')) closeAuthModal(); }
+
+// Tab switch
+let _authMode = 'login';
+function switchAuthTab(mode){
+  _authMode = mode;
+  document.getElementById('tab-login').classList.toggle('active', mode==='login');
+  document.getElementById('tab-signup').classList.toggle('active', mode==='signup');
+  document.getElementById('auth-submit-btn').textContent = mode==='login' ? 'Login' : 'Create Account';
+  document.getElementById('auth-msg').textContent = '';
+}
+
+
+async function authSubmit(){
+  const email = document.getElementById('auth-email').value.trim();
+  const pass  = document.getElementById('auth-pass').value;
+  const msg   = document.getElementById('auth-msg');
+  const btn   = document.getElementById('auth-submit-btn');
+  if(!email || !pass){ msg.className='auth-msg err'; msg.textContent='Enter email and password.'; return; }
+  btn.disabled = true; msg.className='auth-msg'; msg.textContent='Loading…';
+  if(_authMode === 'login'){
+    const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+    if(error){ msg.className='auth-msg err'; msg.textContent=error.message; btn.disabled=false; return; }
+    _currentUser = data.user;
+    msg.className='auth-msg ok'; msg.textContent='Logged in!';
+    updateAuthUI();
+    await loadGame(true);
+  } else {
+    const { data, error } = await sb.auth.signUp({ email, password: pass });
+    if(error){ msg.className='auth-msg err'; msg.textContent=error.message; btn.disabled=false; return; }
+    msg.className='auth-msg ok'; msg.textContent='Account created! Check email to confirm, then log in.';
+  }
+  btn.disabled = false;
+}
+
+async function signOut(){
+  await sb.auth.signOut();
+  _currentUser = null;
+  updateAuthUI();
+  notify('Signed out. Progress not saved until you log back in.');
+}
+
+// ── SAVE ──
+async function saveGame(silent=false){
+  if(!_currentUser){ notify('Log in first to save!'); openAuthModal(); return; }
+  const saveData = {
+    balance:        G.balance,
+    petPower:       G.petPower,
+    tapBonus:       G.tapBonus,
+    totalMult:      G.totalMult,
+    luckMult:       G.luckMult,
+    equipped:       G.equipped,
+    storage:        G.storage,
+    totalHatches:   G.totalHatches,
+    boughtUpgrades: [...G.boughtUpgrades],
+    selectedEggId:  G.selectedEgg.id,
+  };
+  const { error } = await sb.from('saves').upsert({
+    user_id:    _currentUser.id,
+    save_data:  saveData,
+    updated_at: new Date().toISOString(),
+  }, { onConflict: 'user_id' });
+  if(error){
+    if(!silent){ const m=document.getElementById('auth-save-msg'); m.className='auth-msg err'; m.textContent='Save failed: '+error.message; }
+    return;
+  }
+  if(!silent){
+    const m=document.getElementById('auth-save-msg');
+    m.className='auth-msg ok'; m.textContent='✅ Saved at '+new Date().toLocaleTimeString();
+    notify('💾 Game saved!');
+  }
+}
+
+// ── LOAD ──
+async function loadGame(silent=false){
+  if(!_currentUser) return;
+  const { data, error } = await sb.from('saves').select('save_data').eq('user_id', _currentUser.id).single();
+  if(error || !data){
+    if(!silent){ const m=document.getElementById('auth-save-msg'); m.className='auth-msg err'; m.textContent='No save found.'; }
+    return;
+  }
+  const s = data.save_data;
+  G.balance       = s.balance || 0;
+  G.storage       = s.storage || {};
+  G.totalHatches  = s.totalHatches || 0;
+  G.boughtUpgrades= new Set(s.boughtUpgrades || []);
+  // luckMult and maxSlots recomputed from boughtUpgrades by recomputeMult
+  // Pad equipped array to at least saved length
+  const savedEquipped = s.equipped || [null,null,null];
+  G.equipped = savedEquipped;
+  const foundEgg  = EGGS.find(e=>e.id===s.selectedEggId);
+  if(foundEgg) G.selectedEgg = foundEgg;
+  recomputeMult();
+  updateHUD();
+  renderEggSelect();
+  renderRPanel();
+  updateWorldEgg();
+  startAutoClicker();
+  if(!silent){
+    const m=document.getElementById('auth-save-msg');
+    m.className='auth-msg ok'; m.textContent='✅ Loaded!';
+    notify('📂 Game loaded!');
+  } else {
+    notify('📂 Save loaded for '+_currentUser.email.split('@')[0]+'!');
+  }
+}
+
+// Auto-save every 60 seconds when logged in
+setInterval(()=>{ if(_currentUser) saveGame(true); }, 60000);
+
+// ════════════════════════════════════════════════════════════
+// ADMIN SYSTEM
+// Set your email here — only this account sees admin tools
+// ════════════════════════════════════════════════════════════
+const ADMIN_EMAIL = 'd31396802@gmail.com'; // <-- replace with your email
+
+function isAdmin(){ return _currentUser && _currentUser.email === ADMIN_EMAIL; }
+
+function updateAuthUI(){
+  const loggedIn = !!_currentUser;
+  document.getElementById('auth-logged-out').style.display = loggedIn ? 'none' : 'block';
+  document.getElementById('auth-logged-in').style.display  = loggedIn ? 'block' : 'none';
+  // Show admin panel only for admin account
+  const adminPanel = document.getElementById('admin-panel');
+  if(adminPanel) adminPanel.style.display = isAdmin() ? 'block' : 'none';
+  if(loggedIn){
+    document.getElementById('auth-user-email').textContent =
+      (isAdmin() ? '👑 ' : '✅ ') + _currentUser.email;
+    document.getElementById('auth-label').textContent =
+      (isAdmin() ? '👑 ' : '') + _currentUser.email.split('@')[0];
+  } else {
+    document.getElementById('auth-label').textContent = 'Login';
+  }
+}
+
+function adminAddClicks(){
+  const v = parseFloat(document.getElementById('admin-clicks-val').value);
+  if(isNaN(v)||v<=0) return;
+  G.balance += v;
+  updateHUD(); renderEggSelect(); if(G.panelOpen) updateEggPanel();
+  notify('🔧 Added '+fmt(v)+' clicks');
+}
+
+function adminSetClicks(){
+  const v = parseFloat(document.getElementById('admin-set-clicks').value);
+  if(isNaN(v)||v<0) return;
+  G.balance = v;
+  updateHUD(); renderEggSelect(); if(G.panelOpen) updateEggPanel();
+  notify('🔧 Balance set to '+fmt(v));
+}
+
+function adminPreset(amount){
+  G.balance = amount;
+  updateHUD(); renderEggSelect(); if(G.panelOpen) updateEggPanel();
+  notify('🔧 Balance set to '+fmt(amount));
+}
+
+function adminToggleLucky(){
+  G.luckyActive = !G.luckyActive;
+  const btn = document.getElementById('admin-lucky-btn');
+  if(G.luckyActive){
+    btn.textContent='ON'; btn.className='admin-toggle on';
+    document.getElementById('lucky-banner').style.display='block';
+    clearTimeout(G.luckyTimer); // don't auto-expire for admin
+    notify('🍀 Admin lucky mode ON — rates permanently boosted');
+  } else {
+    btn.textContent='OFF'; btn.className='admin-toggle off';
+    document.getElementById('lucky-banner').style.display='none';
+    notify('🍀 Admin lucky mode OFF');
+  }
+}
+
+function adminUnlockAll(){
+  // Temporarily set balance high enough to unlock everything, then restore
+  const saved = G.balance;
+  G.balance = 1e36; // beyond all egg costs
+  renderEggSelect();
+  G.balance = saved;
+  updateHUD();
+  const btn = document.getElementById('admin-unlock-btn');
+  btn.textContent='✅ Done'; btn.className='admin-toggle on';
+  notify('🔧 All eggs visible and selectable (balance unchanged)');
+}
+
+function adminAddPet(){
+  const pid = document.getElementById('admin-pet-id').value.trim();
+  if(!pid) return;
+  // Find pet in any egg
+  let found = null;
+  for(const egg of EGGS){
+    const p = egg.pets.find(x=>x.id===pid);
+    if(p){ found=p; break; }
+  }
+  if(!found){ notify('Pet id "'+pid+'" not found'); return; }
+  if(!G.storage[pid]) G.storage[pid]={pet:{...found},count:0};
+  G.storage[pid].count += 5; // add 5 copies
+  renderRPanel();
+  notify('🔧 Added 5× '+found.name+' to storage');
+}
+
+function adminSetTapBonus(preset){
+  const v = preset !== undefined ? preset :
+    parseFloat(document.getElementById('admin-tap-bonus').value);
+  if(isNaN(v)||v<0) return;
+  G.tapBonus = v;
+  recomputeMult(); updateHUD(); renderRPanel();
+  notify('🔧 Tap bonus set to +'+v+' (×'+(1+v)+' base)');
+}
+
+function adminSetLuck(val){
+  G.luckMult = val;
+  recomputeMult(); updateHUD(); renderRPanel();
+  if(G.panelOpen) updateEggPanel();
+  notify('🍀 Luck set to '+val+'×');
+}
+
+function adminGiveSecret(petId){
+  const pet = EGGS.flatMap(e=>e.pets).find(p=>p.id===petId);
+  if(!pet){ notify('Pet not found: '+petId); return; }
+  if(!G.storage[petId]) G.storage[petId]={pet:{...pet},count:0};
+  G.storage[petId].count++;
+  renderRPanel();
+  notify('🌟 Gave secret pet: '+pet.emoji+' '+pet.name.replace('???','secret'));
+}
+
+function adminPopulateSecrets(){
+  const wrap = document.getElementById('admin-secret-presets');
+  if(!wrap) return;
+  const secrets = EGGS.flatMap(e=>e.pets.filter(p=>p.rarity==='secret'));
+  wrap.innerHTML = secrets.map(p=>
+    `<button class="admin-preset" onclick="adminGiveSecret('${p.id}')">${p.emoji}</button>`
+  ).join('');
+}
+</script>
+</body>
+</html>
